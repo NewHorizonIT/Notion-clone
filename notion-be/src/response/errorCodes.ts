@@ -1,0 +1,8 @@
+const ErrorCodes = {
+  USER_NOT_FOUND: "USER_NOT_FOUND",
+  EMAIL_EXISTS: "EMAIL_EXISTS",
+  INVALID_TOKEN: "INVALID_TOKEN",
+  DATA_INVALID: "DATA_INVALID",
+};
+
+export default ErrorCodes;
