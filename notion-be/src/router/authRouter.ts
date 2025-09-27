@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { container } from "tsyringe";
 import AuthController from "../controllers/authController";
 import { validateBody } from "../middlewares";
-import { UserRegisterSchema } from "../schemas/userSchema";
+import { UserLoginSchema, UserRegisterSchema } from "../schemas/userSchema";
 
 const authRouter = express.Router();
 
@@ -16,7 +16,11 @@ authRouter.post(
 );
 
 // Login Routes
-// authRouter.post("/login");
+authRouter.post(
+  "/auth/login",
+  validateBody(UserLoginSchema),
+  authController.login,
+);
 
 // Handle Refresh Token Routes
 // authRouter.post("/refresh-token");

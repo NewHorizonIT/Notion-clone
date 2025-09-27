@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient, User } from "../generated/prisma";
 
 @injectable()
 export default class UserRepo {
@@ -14,7 +14,7 @@ export default class UserRepo {
     userId: string;
     email: string;
     password: string;
-  }) {
+  }): Promise<User> {
     return this.prisma.user.create({
       data: {
         username: name,
@@ -37,5 +37,9 @@ export default class UserRepo {
     }
 
     return true;
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 }

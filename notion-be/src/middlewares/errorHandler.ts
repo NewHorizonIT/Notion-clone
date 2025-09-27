@@ -1,25 +1,20 @@
 // src/middlewares/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
 import { ErrorResponse } from "../response/response";
+import logger from "../utils/logger";
 
-export function errorHandler(
+export default function errorHandler(
   err: Error | ErrorResponse,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction,
-) {
-  console.error(err);
+  _next: NextFunction,
+): void {
+  logger.error("[Error]: ", err);
 
   if (err instanceof ErrorResponse) {
-    return res.status(err.statusCode).json({
-      status: "error",
+    res.status(err.statusCode || 500).json({
+      error: err.error || "error",
       message: err.message,
     });
   }
-
-  // Lỗi không xác định
-  res.status(500).json({
-    status: "error",
-    message: "Internal Server Error",
-  });
 }

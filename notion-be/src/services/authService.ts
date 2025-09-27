@@ -1,7 +1,12 @@
 import { injectable } from "tsyringe";
-import { UserRegisterData } from "../schemas/userSchema";
+import {
+  UserRegisterData,
+  UserLoginSchema,
+  UserLoginData,
+} from "../schemas/userSchema";
 import UserRepo from "../repositories/userRepo";
 import {
+  comparePassword,
   generateAccessToken,
   generateRefreshToken,
   hashPassword,
@@ -13,7 +18,7 @@ import { ErrorCodes, StatusCodes } from "../response";
 @injectable()
 export default class AuthService {
   constructor(private userRepo: UserRepo) {}
-  async registerAccount(data: UserRegisterData) {
+  async registerAccount(data: UserRegisterData): Promise<any> {
     // Step 1: Get data of new User
     const { name, email, password } = data;
 
@@ -68,6 +73,54 @@ export default class AuthService {
         refreshToken,
       },
       user: newUser,
+    };
+  }
+
+  async login(data: UserLoginData): Promise<any> {
+    const { email, password } = data;
+    // Step 1: Get User by Email
+    const user = await this.userRepo.getUserByEmail(email);
+
+    if (!user) {
+      throw new ErrorResponse({
+        message: "Login Unsuccess",
+        error: ErrorCodes.USER_NOT_FOUND,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    // Step 2: Check password invalid
+    const isCompare = await comparePassword(password, user.passwordHash);
+
+    if (!isCompare) {
+      throw new ErrorResponse({
+        message: "Login Unsuccess",
+        error: ErrorCodes.DATA_INVALID,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    // Step 3: Generate accesstoken and refreshtoken
+    const claimsJWT: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+    };
+    const refreshToken = generateRefreshToken(claimsJWT);
+    const accessToken = generateAccessToken(claimsJWT);
+
+    if (!refreshToken || !refreshToken) {
+      throw new ErrorResponse({
+        message: "Login Unsuccess",
+        error: ErrorCodes.INVALID_TOKEN,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    // Step 4: Return Object data for controller
+
+    return {
+      token: {
+        accessToken,
+        refreshToken,
+      },
+      user,
     };
   }
 }
