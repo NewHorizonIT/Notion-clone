@@ -1,9 +1,5 @@
 import { injectable } from "tsyringe";
-import {
-  UserRegisterData,
-  UserLoginSchema,
-  UserLoginData,
-} from "../schemas/userSchema";
+import { UserRegisterData, UserLoginData } from "../schemas/userSchema";
 import UserRepo from "../repositories/userRepo";
 import {
   comparePassword,
@@ -121,6 +117,34 @@ export default class AuthService {
         refreshToken,
       },
       user,
+    };
+  }
+
+  handleRefreshToken(
+    refreshToken: string,
+    refreshTokenInCache: string,
+    user: JwtPayload,
+  ): any {
+    // Step 1: Compare two token
+    if (refreshToken !== refreshTokenInCache) {
+      throw new ErrorResponse({
+        message: "Handle RefreshToken unsuccess",
+        error: ErrorCodes.INVALID_TOKEN,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+
+    // Step 2: Create New Access Token and Refresh Token
+    const claimJWT: JwtPayload = {
+      userId: user.userId,
+      email: user.email,
+    };
+    const newRefreshToken = generateRefreshToken(claimJWT);
+    const newAccessToken = generateAccessToken(claimJWT);
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     };
   }
 }

@@ -23,7 +23,7 @@ authRouter.post(
 );
 
 // Handle Refresh Token Routes
-// authRouter.post("/refresh-token");
+authRouter.post("/auth/refresh-token", authController.handleRefreshToken);
 
 // Reset Password Routes
 // authRouter.post("/reset-password");

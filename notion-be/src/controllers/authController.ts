@@ -5,6 +5,7 @@ import { injectable } from "tsyringe";
 import CacheService from "../services/cacheService";
 import { ErrorResponse, SuccessResponse } from "../response/response";
 import { ErrorCodes, StatusCodes } from "../response";
+import { JwtPayload, validateToken } from "../utils";
 
 @injectable()
 export default class AuthController {
@@ -83,6 +84,72 @@ export default class AuthController {
       message: "Login Success",
       statusCode: StatusCodes.CREATED,
       data: user,
+    }).send(res);
+  };
+
+  public handleRefreshToken = async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    // Step 1: Get Token in cookie and validate
+    const refreshToken = req.cookies["refresh_token"];
+    const user: JwtPayload | null = validateToken(refreshToken);
+
+    if (!user) {
+      throw new ErrorResponse({
+        message: "Handle RefreshToken unSuccess",
+        error: ErrorCodes.DATA_INVALID,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+
+    // Step 2: get token in Redis
+    const deviceId = req.headers["x-device-id"] as string | undefined;
+    const keyCache = `${user?.userId}:${deviceId}`;
+    const refreshTokenInCache = await this.cacheSerive.get(keyCache);
+
+    // Step 3: Call AuthService method handleRefreshToken
+    const newTokenPair = this.authService.handleRefreshToken(
+      refreshToken,
+      refreshTokenInCache,
+      user,
+    );
+
+    if (!newTokenPair) {
+      throw new ErrorResponse({
+        message: "Handle RefreshToken unSuccess",
+        error: ErrorCodes.DATA_INVALID,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+
+    const isCached = await this.cacheSerive.set(
+      keyCache,
+      newTokenPair.refreshToken,
+    );
+
+    if (!isCached) {
+      throw new ErrorResponse({
+        message: "Handle RefreshToken unSuccess",
+        error: ErrorCodes.DATA_INVALID,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+
+    res.cookie("refresh_token", newTokenPair.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    new SuccessResponse({
+      message: "Handle RefreshToken",
+      statusCode: StatusCodes.OK,
+      data: {
+        accessToken: newTokenPair.accessToken,
+        refreshToken: newTokenPair.refreshToken,
+      },
     }).send(res);
   };
 }
