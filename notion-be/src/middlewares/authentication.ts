@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { ErrorCodes, ReasonPhrases, StatusCodes } from "../response";
 import { validateToken } from "../utils/jwt";
+import { ErrorResponse } from "../response/response";
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export function authenticate(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void {
   const authHeader = req.headers["authorization"];
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({
+    throw new ErrorResponse({
       error: ErrorCodes.INVALID_TOKEN,
       message: ReasonPhrases.UNAUTHORIZED,
     });
@@ -13,12 +18,12 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = authHeader.split(" ")[1];
   const payload = validateToken(token);
   if (!payload) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({
+    throw new ErrorResponse({
       error: ErrorCodes.INVALID_TOKEN,
       message: ReasonPhrases.UNAUTHORIZED,
-      StatusCodes: StatusCodes.UNAUTHORIZED,
+      statusCode: StatusCodes.UNAUTHORIZED,
     });
   }
-  (req as any).user = payload;
+  req.user = payload;
   next();
 }

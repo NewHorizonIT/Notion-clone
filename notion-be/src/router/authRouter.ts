@@ -3,6 +3,7 @@ import { container } from "tsyringe";
 import AuthController from "../controllers/authController";
 import { validateBody } from "../middlewares";
 import { UserLoginSchema, UserRegisterSchema } from "../schemas/userSchema";
+import { authenticate } from "../middlewares/authentication";
 
 const authRouter = express.Router();
 
@@ -15,6 +16,7 @@ authRouter.post(
   authController.resgister,
 );
 
+authRouter.use(authenticate);
 // Login Routes
 authRouter.post(
   "/auth/login",
@@ -25,7 +27,7 @@ authRouter.post(
 // Handle Refresh Token Routes
 authRouter.post("/auth/refresh-token", authController.handleRefreshToken);
 
-// Reset Password Routes
-// authRouter.post("/reset-password");
+// Logout
+authRouter.post("/auth/logout", authController.logout);
 
 export default authRouter;

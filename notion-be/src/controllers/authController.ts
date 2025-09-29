@@ -152,4 +152,26 @@ export default class AuthController {
       },
     }).send(res);
   };
+
+  public logout = async (req: Request, res: Response): Promise<void> => {
+    // Step 1: clean token in Redis
+    const deviceId = req.headers["x-device-id"] as string | undefined;
+    const keyCache = `${req.user.userId}:${deviceId}`;
+    await this.cacheSerive.delete(keyCache);
+
+    // Step 2: clean cookie
+    res.cookie("refresh_token", "", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Step 3: Return response
+    new SuccessResponse({
+      message: "Logout Sucess",
+      statusCode: StatusCodes.OK,
+      data: null,
+    }).send(res);
+  };
 }
