@@ -8,11 +8,14 @@ import "./utils/redis";
 import cookieParser from "cookie-parser";
 import { ErrorRequestHandler } from "express";
 import { errorHandler } from "./middlewares";
+import { corsOptions } from "./config/cors";
+import cors from "cors";
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cors(corsOptions));
 app.use(requestLogger);
 
 app.get("/", (req, res, next) => {

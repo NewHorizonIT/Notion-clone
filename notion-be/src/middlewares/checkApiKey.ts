@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import config from "../config";
 import { StatusCodes } from "../response/httpStatus";
 import ErrorCodes from "../response/errorCodes";
+import { ErrorResponse } from "../response/response";
 
 export default function checkApiKey(
   req: Request,
@@ -11,9 +12,10 @@ export default function checkApiKey(
   const apiKey =
     req.headers["x-api-key"] || req.query.apiKey || req.body.apiKey;
   if (!apiKey || apiKey !== config.api.key) {
-    res.status(StatusCodes.UNAUTHORIZED).json({
+    throw new ErrorResponse({
+      message: "APIKEY INVALID",
+      statusCode: StatusCodes.UNAUTHORIZED,
       error: ErrorCodes.INVALID_TOKEN,
-      message: "Invalid or missing API key",
     });
   }
   next();
