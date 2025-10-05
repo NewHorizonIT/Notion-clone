@@ -11,6 +11,8 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { ErrorResponse } from "../response/response";
 import { ErrorCodes, StatusCodes } from "../response";
+import crypto from "node:crypto";
+import sendResetEmail from "../utils/email";
 @injectable()
 export default class AuthService {
   constructor(private userRepo: UserRepo) {}
@@ -145,6 +147,39 @@ export default class AuthService {
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
+    };
+  }
+
+  async resetPassword(userId: string, password: string): Promise<any> {
+    // Step 1: HashPassword User
+    const passwordHashed = await hashPassword(password);
+
+    // Step 2: Update password by UserId
+    const newUser = this.userRepo.updateUserById(userId, {
+      passwordHash: passwordHashed,
+    });
+
+    if (!newUser) {
+      throw new ErrorResponse({
+        message: "Reset Password fail",
+        statusCode: StatusCodes.UNAUTHORIZED,
+        error: ErrorCodes.DATA_INVALID,
+      });
+    }
+
+    return {
+      newUser,
+    };
+  }
+
+  async sendEmailFogetPassword(email: string): Promise<any> {
+    const token = crypto.randomBytes(32).toString("hex");
+    await sendResetEmail(email, token);
+    const user = await this.userRepo.getUserByEmail(email);
+
+    return {
+      token,
+      userId: user?.id,
     };
   }
 }

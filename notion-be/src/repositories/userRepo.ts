@@ -42,4 +42,15 @@ export default class UserRepo {
   async getUserByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { email } });
   }
+
+  async updateUserById(userId: string, data: Partial<User>): Promise<User> {
+    const newUser = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data,
+    });
+
+    return newUser;
+  }
 }

@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { container } from "tsyringe";
 import AuthController from "../controllers/authController";
 import { validateBody } from "../middlewares";
@@ -16,7 +16,6 @@ authRouter.post(
   authController.resgister,
 );
 
-authRouter.use(authenticate);
 // Login Routes
 authRouter.post(
   "/auth/login",
@@ -24,9 +23,16 @@ authRouter.post(
   authController.login,
 );
 
+// Reset password
+authRouter.post("/auth/reset-password", authController.resetPassword);
+
+// Forget Password
+authRouter.post("/auth/forget-password", authController.forgetPassword);
+
 // Handle Refresh Token Routes
 authRouter.post("/auth/refresh-token", authController.handleRefreshToken);
 
+authRouter.use(authenticate);
 // Logout
 authRouter.post("/auth/logout", authController.logout);
 

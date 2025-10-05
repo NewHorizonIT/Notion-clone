@@ -9,12 +9,19 @@ export const UserRegisterSchema = UserLoginSchema.extend({
   name: z.string().min(1, "Name is required"),
 });
 
-export interface UserResponseDTO {
+export const userResetPassword = z.object({
+  password: z.string().min(5, "Length password more than 5"),
+});
+
+export interface UserRsponseDTO {
+  user: Record<string, string | number>;
+}
+
+export interface UserResponseRegisterDTO extends UserRsponseDTO {
   token?: {
     accessToken?: string;
     refreshToken?: string;
   };
-  user: Record<string, string | number>;
 }
 
 export type UserRegisterData = z.infer<typeof UserRegisterSchema>;

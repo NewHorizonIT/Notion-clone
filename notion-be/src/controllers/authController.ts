@@ -174,4 +174,58 @@ export default class AuthController {
       data: null,
     }).send(res);
   };
+
+  public resetPassword = async (req: Request, res: Response): Promise<void> => {
+    // Step 1: Get token
+    const token = req.query.token as string;
+
+    if (!token) {
+      throw new ErrorResponse({
+        message: "Reset Password fail",
+        statusCode: StatusCodes.UNAUTHORIZED,
+        error: ErrorCodes.DATA_INVALID,
+      });
+    }
+    // Step 2: Find token in Redis
+    const key = `reset:${token}`;
+    const userId = await this.cacheSerive.get(key);
+
+    if (!userId) {
+      throw new ErrorResponse({
+        message: "Reset Password fail",
+        statusCode: StatusCodes.UNAUTHORIZED,
+        error: ErrorCodes.USER_NOT_FOUND,
+      });
+    }
+    const { password } = req.body;
+    const newUser = await this.authService.resetPassword(userId, password);
+    // Step 3: Delete token in redis
+    await this.cacheSerive.delete(key);
+
+    new SuccessResponse({
+      statusCode: StatusCodes.OK,
+      message: "Reset password Success",
+      data: newUser,
+    }).send(res);
+  };
+
+  public forgetPassword = async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    const { email } = req.body;
+
+    // Step 2: call Service sendEmail
+    const { token, userId } =
+      await this.authService.sendEmailFogetPassword(email);
+
+    // Cache Token
+    const key = `reset:${token}`;
+    await this.cacheSerive.set(key, userId, 3600);
+    new SuccessResponse({
+      message: "Send email Success",
+      statusCode: StatusCodes.OK,
+      data: null,
+    }).send(res);
+  };
 }
