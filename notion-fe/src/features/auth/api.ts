@@ -6,3 +6,11 @@ export const loginUser = (credentials: LoginData) =>
 
 export const registerUser = (userData: SignupData) =>
   api.post("/auth/register", userData).then((res) => res.data);
+
+export const forgetPassword = (email: string) =>
+  api.post("/auth/forget-password", { email }).then((res) => res.data);
+
+export const resetPassword = (password: string, token: string) =>
+  api
+    .post("/auth/reset-password", { password }, { params: { token } })
+    .then((res) => res.data);

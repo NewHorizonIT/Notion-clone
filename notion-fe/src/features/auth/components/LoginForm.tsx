@@ -11,10 +11,14 @@ import { Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useLogin } from "../hooks";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useModalStore } from "@/shared/store/useModalStore";
 
 type LoginInput = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
+  const { openModal } = useModalStore();
+  const router = useRouter();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -30,6 +34,8 @@ export default function LoginForm() {
     if (isError) {
       toast.error("Login failed");
     }
+    toast.success("Login Success");
+    router.push("/");
   };
 
   return (
@@ -51,6 +57,14 @@ export default function LoginForm() {
           type="password"
           icon={<Lock />}
         />
+        <div className="flex justify-end">
+          <p
+            className="text-primary text-base cursor-pointer"
+            onClick={() => openModal("forget-password")}
+          >
+            Forget passowrd?
+          </p>
+        </div>
         <Button type="submit" className="w-full cursor-pointer">
           {isLoading ? "...Loading" : "Login"}
         </Button>

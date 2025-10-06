@@ -9,10 +9,14 @@ import { Form } from "@/shared/components/ui/form";
 import FormFieldCustom from "./FormFieldCustom";
 import { Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRegister } from "../hooks";
+import { toast } from "sonner";
 
 type SignupInput = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
+  const router = useRouter();
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -22,8 +26,14 @@ export default function SignupForm() {
     },
   });
 
+  const { mutateUser, isError } = useRegister();
   const onSubmit = (data: SignupInput) => {
-    console.log("Signup data", data);
+    mutateUser(data);
+    if (isError) {
+      toast.error("Login failed");
+    }
+    toast.success("Register Success");
+    router.push("/");
   };
 
   return (
