@@ -3,10 +3,11 @@ import tseslint from "typescript-eslint";
 import prettierPlugin from "eslint-plugin-prettier";
 import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
   ...tseslint.configs.recommended,
+  globalIgnores(["logs/*", "src/generated/*", "node_modules/*", "tests/*"]),
   {
     files: ["**/*.ts"],
     languageOptions: {
