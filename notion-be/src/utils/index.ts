@@ -5,6 +5,7 @@ import {
   generateRefreshToken,
   validateToken,
 } from "./jwt";
+import { createSlug } from "./slug";
 
 import redis from "./redis";
 
@@ -16,4 +17,5 @@ export {
   validateToken,
   JwtPayload,
   redis,
+  createSlug,
 };
