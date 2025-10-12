@@ -59,9 +59,17 @@ class WorkSpaceController {
   public getWorkspaceById = async (req: Request, res: Response) => {
     // Step 1: get id from request
     const { id } = req.params;
+    const userId = req.user.userId as string;
+    if (!userId) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.UNAUTHORIZED,
+        message: "Unauthorized",
+        error: "Unauthorized",
+      });
+    }
 
     // Step 2: get workspace by id
-    const workspace = await this.workSpaceRepo.getWorkspaceById(id);
+    const workspace = await this.workSpaceRepo.getWorkspaceById(id, userId);
     if (!workspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
@@ -82,9 +90,21 @@ class WorkSpaceController {
     // Step 1: get id from request
     const { id } = req.params;
     const { name } = req.body;
+    const userId = req.user.userId as string;
+    if (!userId) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.UNAUTHORIZED,
+        message: "Unauthorized",
+        error: "Unauthorized",
+      });
+    }
 
     // Step 2: update workspace
-    const workspace = await this.workSpaceRepo.updateWorkspace(name, id);
+    const workspace = await this.workSpaceRepo.updateWorkspace(
+      name,
+      id,
+      userId,
+    );
     if (!workspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,

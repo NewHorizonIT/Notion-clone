@@ -34,8 +34,8 @@ class WorkspaceService {
   }
 
   // Get workspace by id
-  public async getWorkspaceById(id: string): Promise<any> {
-    const workspace = await this.workspaceRepo.getWorkspaceById(id);
+  public async getWorkspaceById(id: string, userId: string): Promise<any> {
+    const workspace = await this.workspaceRepo.getWorkspaceById(id, userId);
     if (!workspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
@@ -58,9 +58,13 @@ class WorkspaceService {
   public async updateWorkspace(
     newName: string,
     id: string,
+    userId: string,
   ): Promise<WorkSpaceResponse> {
     // Step 1: check if workspace exists
-    const existingWorkspace = await this.workspaceRepo.getWorkspaceById(id);
+    const existingWorkspace = await this.workspaceRepo.getWorkspaceById(
+      id,
+      userId,
+    );
     if (!existingWorkspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
