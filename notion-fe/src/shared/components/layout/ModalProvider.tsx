@@ -2,6 +2,7 @@
 "use client";
 
 import { ForgetPasswordModal } from "@/features/auth/components/modals/ForgetPassword";
+import CreateWorkSpaceForm from "@/features/workspace/components/modal/CreateWorkSpaeForm";
 import { useModalStore } from "@/shared/store/useModalStore";
 
 export function ModalProvider() {
@@ -11,6 +12,13 @@ export function ModalProvider() {
     <>
       {modalType === "forget-password" && (
         <ForgetPasswordModal open onOpenChange={closeModal} {...modalProps} />
+      )}
+      {modalType === "create-workspace" && (
+        <CreateWorkSpaceForm
+          isOpen={open}
+          onOpenChange={closeModal}
+          {...modalProps}
+        />
       )}
     </>
   );

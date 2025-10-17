@@ -13,11 +13,13 @@ import { useLogin } from "../hooks";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useModalStore } from "@/shared/store/useModalStore";
+import useAuthStore from "@/shared/store/useAuthStore";
 
 type LoginInput = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const { openModal } = useModalStore();
+  const { setToken } = useAuthStore();
   const router = useRouter();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -27,14 +29,16 @@ export default function LoginForm() {
     },
   });
 
-  const { isLoading, isError, mutateUser } = useLogin();
+  const { user, isLoading, isError, mutateUser } = useLogin();
 
-  const onSubmit = (data: LoginData) => {
-    mutateUser(data);
+  const onSubmit = async (data: LoginData) => {
+    await mutateUser(data);
     if (isError) {
       toast.error("Login failed");
     }
     toast.success("Login Success");
+    console.log(user);
+    setToken(user.data.token.accessToken);
     router.push("/");
   };
 

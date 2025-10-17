@@ -1,19 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Search,
-  Moon,
-  Sun,
-  User,
-  Settings,
-  LogOut,
-  ChevronRight,
-} from "lucide-react";
+import { Search, User, Settings, LogOut, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { toast } from "sonner";
-import { useTheme } from "next-themes";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import {
@@ -26,6 +17,7 @@ import {
 } from "../../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { scaleIn } from "../../common/MotionWrapper";
+import { ModeToggle } from "../../common/ModeToggle";
 
 const breadcrumbs = [
   { label: "Getting Started", href: "#" },
@@ -35,12 +27,6 @@ const breadcrumbs = [
 export function Topbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-    toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
-  };
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -80,23 +66,14 @@ export function Topbar() {
           <h1>AddMember</h1>
 
           {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="h-9 w-9"
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          <ModeToggle />
 
           {/* User Menu */}
           <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 w-9 rounded-full p-0">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/diverse-user-avatars.png" />
+                  <AvatarImage src="" />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
               </Button>
