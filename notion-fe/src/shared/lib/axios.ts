@@ -1,5 +1,6 @@
 import axios from "axios";
 import getDeviceId from "../utils/getDeviceId";
+import useAuthStore from "../store/useAuthStore";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/api/v1",
@@ -13,6 +14,10 @@ api.interceptors.request.use((config) => {
   const deviceId = getDeviceId();
 
   config.headers["X-Device-ID"] = deviceId;
+  const token = useAuthStore.getState().token; // ⚡ Lấy token trực tiếp từ Zustand
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
   return config;
 });

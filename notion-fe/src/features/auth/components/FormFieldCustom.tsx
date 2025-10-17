@@ -39,13 +39,13 @@ export default function FormFieldCustom<T extends FieldValues>({
         <FormItem>
           <FormLabel className="text-white pb-2">{label}</FormLabel>
           <FormControl>
-            <div className="flex items-center bg-gray-800 border border-gray-600 rounded-md px-4 py-2">
+            <div className="flex items-center bg-transparent border-gray-500 border-2 rounded-md px-4 py-2">
               <div className=" text-white min-w-[30px]">{icon}</div>
               <Input
                 placeholder={placeholder}
                 type={type}
                 {...field}
-                className="bg-transparent focus:outline-none text-gray-400 flex-1 border-0"
+                className="bg-transparent focus:outline-none text-white flex-1 border-0"
               />
             </div>
           </FormControl>

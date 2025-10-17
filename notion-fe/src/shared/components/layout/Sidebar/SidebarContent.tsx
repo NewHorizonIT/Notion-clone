@@ -3,8 +3,23 @@ import { ChevronRight, Plus, Settings, X } from "lucide-react";
 import { Button } from "../../ui/button";
 import { toast } from "sonner";
 import { ScrollArea } from "../../ui/scroll-area";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageItem, { Page } from "./PageItem";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+} from "../../ui/select";
+import { SelectArrow } from "@radix-ui/react-select";
+import {
+  useCreateWorkspace,
+  useGetListWorkspace,
+} from "@/features/workspace/hooks";
+import { useModalStore } from "@/shared/store/useModalStore";
+import useWorkspaceStore from "@/shared/store/useWorkspaceStore";
 
 const initialPages: Page[] = [
   {
@@ -35,6 +50,21 @@ export default function SidebarContent({
   setIsMobileOpen?: (open: boolean) => void;
 }) {
   const [pages, setPages] = useState<Page[]>(initialPages);
+  // Handle create workspace
+  const { workspace, isError, mutateWorkspace } = useCreateWorkspace();
+  // Handle Open modal
+  const { openModal, closeModal } = useModalStore();
+  // Fetch data workspace and set into useWorkspaceStore
+  const { setWorkspace, workspaces } = useWorkspaceStore();
+  const {
+    workspaces: data,
+    isLoading,
+    isError: errorGetListWorkspace,
+  } = useGetListWorkspace();
+  useEffect(() => {
+    if (data) setWorkspace(data);
+  }, [data, setWorkspace]);
+
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border">
       <div className="p-3 border-b border-sidebar-border">
@@ -50,14 +80,39 @@ export default function SidebarContent({
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2 hover:bg-sidebar-accent"
-          onClick={() => toast.info("Workspace switcher coming soon")}
-        >
-          <span className="text-sm">My Workspace</span>
-          <ChevronRight className="h-4 w-4 ml-auto" />
-        </Button>
+        <Select>
+          <SelectTrigger className="w-full">
+            <Button variant="ghost" asChild>
+              <span className="text-sm">My Workspace</span>
+            </Button>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Workspace</SelectLabel>
+                {workspaces.map((w) => (
+                  <SelectItem
+                    value={w.id}
+                    className="cursor-pointer"
+                    key={w.id}
+                  >
+                    {w.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectArrow />
+              <SelectGroup>
+                <Button
+                  className="w-full cursor-pointer"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openModal("create-workspace")}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Workspace
+                </Button>
+              </SelectGroup>
+            </SelectContent>
+          </SelectTrigger>
+        </Select>
       </div>
 
       <ScrollArea className="flex-1 px-2 py-2">
