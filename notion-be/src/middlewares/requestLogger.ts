@@ -13,7 +13,6 @@ export function requestLogger(
     const duration = Date.now() - start;
 
     if (["/favicon.ico", "/healthz"].includes(req.path)) return;
-
     const logLevel =
       res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
 

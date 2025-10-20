@@ -7,7 +7,7 @@ import router from "./router";
 import "./utils/redis";
 import cookieParser from "cookie-parser";
 import { ErrorRequestHandler } from "express";
-import { errorHandler } from "./middlewares";
+import { checkApiKey, errorHandler } from "./middlewares";
 import { corsOptions } from "./config/cors";
 import cors from "cors";
 import logger from "./utils/logger";
@@ -20,7 +20,7 @@ app.use(cors(corsOptions));
 app.use(requestLogger);
 
 // Setup Router
-app.use("/api/v1", router);
+app.use("/api/v1", checkApiKey, router);
 
 app.use(errorHandler as ErrorRequestHandler);
 
