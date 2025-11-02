@@ -120,7 +120,7 @@ model Block {
   pageId     String   @map("page_id")
   parentId   String?  @map("parent_id")
   type       String   @db.VarChar(50)
-  content    String?
+  content    Json?
   orderIndex Int      @map("order_index")
   isDeleted  Boolean  @default(false) @map("is_deleted")
   createdAt  DateTime @default(now()) @map("created_at")

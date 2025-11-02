@@ -8,22 +8,26 @@ export function authenticate(
   _res: Response,
   next: NextFunction,
 ): void {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new ErrorResponse({
-      error: ErrorCodes.INVALID_TOKEN,
-      message: ReasonPhrases.UNAUTHORIZED,
-    });
+  try {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new ErrorResponse({
+        error: ErrorCodes.INVALID_TOKEN,
+        message: ReasonPhrases.UNAUTHORIZED,
+      });
+    }
+    const token = authHeader.split(" ")[1];
+    const payload = validateToken(token);
+    if (!payload) {
+      throw new ErrorResponse({
+        error: ErrorCodes.INVALID_TOKEN,
+        message: ReasonPhrases.UNAUTHORIZED,
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    req.user = payload;
+    next();
+  } catch (error) {
+    console.error("[Authetication]: ", error);
   }
-  const token = authHeader.split(" ")[1];
-  const payload = validateToken(token);
-  if (!payload) {
-    throw new ErrorResponse({
-      error: ErrorCodes.INVALID_TOKEN,
-      message: ReasonPhrases.UNAUTHORIZED,
-      statusCode: StatusCodes.UNAUTHORIZED,
-    });
-  }
-  req.user = payload;
-  next();
 }
