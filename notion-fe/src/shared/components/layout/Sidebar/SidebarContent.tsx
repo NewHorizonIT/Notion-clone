@@ -1,10 +1,16 @@
 "use client";
-import { ChevronRight, Plus, Settings, X } from "lucide-react";
-import { Button } from "../../ui/button";
-import { toast } from "sonner";
-import { ScrollArea } from "../../ui/scroll-area";
+import {
+  useCreateWorkspace,
+  useGetListWorkspace,
+} from "@/features/workspace/hooks";
+import { useModalStore } from "@/shared/store/useModalStore";
+import useWorkspaceStore from "@/shared/store/useWorkspaceStore";
+import { SelectArrow } from "@radix-ui/react-select";
+import { Plus, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import PageItem, { Page } from "./PageItem";
+import { toast } from "sonner";
+import { Button } from "../../ui/button";
+import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -13,33 +19,39 @@ import {
   SelectLabel,
   SelectTrigger,
 } from "../../ui/select";
-import { SelectArrow } from "@radix-ui/react-select";
-import {
-  useCreateWorkspace,
-  useGetListWorkspace,
-} from "@/features/workspace/hooks";
-import { useModalStore } from "@/shared/store/useModalStore";
-import useWorkspaceStore from "@/shared/store/useWorkspaceStore";
+import PageItem, { Page } from "./PageItem";
 
 const initialPages: Page[] = [
   {
     id: "1",
     title: "Getting Started",
-    icon: "📚",
     children: [
-      { id: "1-1", title: "Welcome", icon: "👋" },
-      { id: "1-2", title: "Quick Start", icon: "⚡" },
+      { id: "1-1", title: "Welcome" },
+      {
+        id: "1-2",
+        title: "Quick Start",
+        children: [
+          { id: "1-2-1", title: "Installation" },
+          {
+            id: "1-2-2",
+            title: "Usage",
+            children: [
+              { id: "1-2-2-1", title: "Basic Features" },
+              { id: "1-2-2-2", title: "Advanced Features" },
+            ],
+          },
+        ],
+      },
     ],
   },
-  { id: "2", title: "Project Ideas", icon: "💡" },
-  { id: "3", title: "Meeting Notes", icon: "📝" },
+  { id: "2", title: "Project Ideas" },
+  { id: "3", title: "Meeting Notes" },
   {
     id: "4",
     title: "Resources",
-    icon: "🔗",
     children: [
-      { id: "4-1", title: "Documentation", icon: "📖" },
-      { id: "4-2", title: "Tutorials", icon: "🎓" },
+      { id: "4-1", title: "Documentation" },
+      { id: "4-2", title: "Tutorials" },
     ],
   },
 ];
@@ -66,7 +78,7 @@ export default function SidebarContent({
   }, [data, setWorkspace]);
 
   return (
-    <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border">
+    <div className="flex h-screen flex-col bg-sidebar border-r border-sidebar-border">
       <div className="p-3 border-b border-sidebar-border">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-semibold">NotionX</h1>
@@ -115,10 +127,13 @@ export default function SidebarContent({
         </Select>
       </div>
 
-      <ScrollArea className="flex-1 px-2 py-2">
+      <ScrollArea className="flex-1 min-h-0 px-2 py-2">
         <div className="flex flex-col gap-0.5">
-          {pages.map((page) => PageItem(page))}
+          {pages.map((page) => (
+            <PageItem key={page.id} page={page} />
+          ))}
         </div>
+        <ScrollBar orientation={"vertical"} />
       </ScrollArea>
 
       <div className="p-3 border-t border-sidebar-border space-y-1">
