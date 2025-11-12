@@ -1,10 +1,8 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../../ui/button";
 import SidebarContent from "./SidebarContent";
 export function Sidebar() {
@@ -12,7 +10,7 @@ export function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <>
+    <div className="sticky top-0 left-0 h-screen z-50">
       {/* Mobile Menu Button */}
       <Button
         variant="ghost"
@@ -28,7 +26,7 @@ export function Sidebar() {
         initial={false}
         animate={{ width: isOpen ? 280 : 0 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="hidden lg:block h-screen overflow-hidden"
+        className="hidden lg:block h-screen"
       >
         <AnimatePresence>
           {isOpen && (
@@ -37,7 +35,7 @@ export function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="h-full w-[280px]"
+              className="h-screen w-[280px]"
             >
               {<SidebarContent />}
             </motion.div>
@@ -69,6 +67,6 @@ export function Sidebar() {
           </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

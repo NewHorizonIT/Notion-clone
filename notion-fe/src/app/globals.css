@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
+@source "../node_modules/@blocknote/shadcn";
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -76,6 +76,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.623 0.214 259.815);
+  --bn-colors-editor-background: #fff;
+  --blocknote-color-text: #111;
 }
 
 .dark {
@@ -110,6 +112,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.488 0.243 264.376);
+  --bn-colors-editor-background: oklch(0.141 0.005 285.823);
+  --blocknote-color-text: #ddd;
 }
 
 @layer base {

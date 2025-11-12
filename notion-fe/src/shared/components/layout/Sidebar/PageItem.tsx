@@ -1,22 +1,24 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "../../ui/button";
-import { cn } from "@/shared/lib/utils";
-import { ChevronRight, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRight, StickyNote } from "lucide-react";
 import { useState } from "react";
 
 export interface Page {
   id: string;
   title: string;
-  icon: string;
+  icon?: string;
   children?: Page[];
 }
 
-export default function PageItem(page: Page, depth = 0) {
-  const [expandedPages, setExpandedPages] = useState<Set<string>>(
-    new Set(["1", "4"])
-  );
-  const hasChildren = page.children && page.children.length > 0;
-  const isExpanded = expandedPages.has(page.id);
+export default function PageItem({
+  page,
+  depth = 0,
+}: {
+  page: Page;
+  depth?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const handleExpand = () => setExpanded(!expanded);
   return (
     <div key={page.id}>
       <motion.div
@@ -24,47 +26,49 @@ export default function PageItem(page: Page, depth = 0) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start gap-2 px-2 py-1.5 h-auto font-normal hover:bg-sidebar-accent group",
-            depth > 0 && "ml-4"
-          )}
+        {/* Render list page of head */}
+        <div
+          className="group flex gap-4 items-center px-3 py-2 cursor-pointer hover:bg-background/50"
+          style={{ paddingLeft: depth * 16 + 12 }}
         >
-          {hasChildren && (
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            </motion.div>
-          )}
-          {!hasChildren && <div className="w-3" />}
-          <span className="text-base">{page.icon}</span>
-          <span className="flex-1 text-left text-sm truncate">
-            {page.title}
-          </span>
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-          >
-            <Trash2 className="h-2 w-2" />
-          </Button>
-        </Button>
+          <div className="w-6 h-6 p-2 rounded-sm flex items-center justify-center hover:bg-foreground/10">
+            <span className="block group-hover:hidden">
+              {page.icon || <StickyNote size={16} />}
+            </span>
+            <span className="hidden group-hover:block" onClick={handleExpand}>
+              <motion.div
+                animate={{ rotate: expanded ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronRight size={18} />
+              </motion.div>
+            </span>
+          </div>
+          <span>{page.title}</span>
+        </div>
       </motion.div>
 
       <AnimatePresence>
-        {hasChildren && isExpanded && (
+        {expanded && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden"
           >
-            {page.children?.map((child) => PageItem(child, depth + 1))}
+            {/* Render child pages here */}
+            {page.children ? (
+              page.children.map((child) => (
+                <PageItem key={child.id} page={child} depth={depth + 1} />
+              ))
+            ) : (
+              <p
+                className="pl-8 py-2 text-sm text-muted-foreground"
+                style={{ paddingLeft: depth * 16 + 12 }}
+              >
+                No sub-pages
+              </p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
