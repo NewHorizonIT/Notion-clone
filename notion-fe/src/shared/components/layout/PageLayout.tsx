@@ -1,6 +1,5 @@
 "use client";
 
-import { IconName, IconPicker } from "@/components/ui/icon-picker";
 import { cn } from "@/shared/lib/utils";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
@@ -9,16 +8,16 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 import { Editor } from "./Editor/EditorWrapper";
+import { Page } from "@/shared/types";
 
 interface PageLayoutProps {
-  content?: string;
+  page: Page;
 }
 
-export function PageLayout({ content }: PageLayoutProps) {
-  const [titleValue, setTitleValue] = useState("");
+export function PageLayout({ page }: PageLayoutProps) {
+  const [titleValue, setTitleValue] = useState(page.title);
   const [showRightSidebar, setShowRightSidebar] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [icon, setIcon] = useState<IconName | undefined>(undefined);
 
   const handleRandomImage = async () => {
     const randomIndex = Math.floor(Math.random() * 3);
@@ -47,11 +46,6 @@ export function PageLayout({ content }: PageLayoutProps) {
               <ImageIcon />
               <p>Add cover </p>
             </Button>
-            <IconPicker
-              value={icon}
-              onValueChange={(icon) => setIcon(icon)}
-              className="mb-4 flex items-center gap-2 cursor-pointer"
-            />
           </div>
           <Input
             className={cn(
