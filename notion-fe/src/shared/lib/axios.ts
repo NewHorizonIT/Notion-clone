@@ -3,7 +3,7 @@ import getDeviceId from "../utils/getDeviceId";
 import useAuthStore from "../store/useAuthStore";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: process.env.NEXT_API_URL,
   headers: {
     "X-Api-Key": process.env.NEXT_PUBLIC_API_KEY,
   },

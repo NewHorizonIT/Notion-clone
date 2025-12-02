@@ -21,7 +21,7 @@ import {
 } from "../../ui/select";
 import PageItem, { Page } from "./PageItem";
 
-const initialPages: Page[] = [
+export const initialPages: Page[] = [
   {
     id: "1",
     title: "Getting Started",

@@ -1,6 +1,9 @@
+"use client";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronRight, StickyNote } from "lucide-react";
+import { ChevronRight, Plus, StickyNote } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../../ui/button";
+import Link from "next/link";
 
 export interface Page {
   id: string;
@@ -17,8 +20,9 @@ export default function PageItem({
   depth?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
-
   const handleExpand = () => setExpanded(!expanded);
+  // Naviagte to page
+
   return (
     <div key={page.id}>
       <motion.div
@@ -28,7 +32,7 @@ export default function PageItem({
       >
         {/* Render list page of head */}
         <div
-          className="group flex gap-4 items-center px-3 py-2 cursor-pointer hover:bg-background/50"
+          className="group flex gap-4 items-center justify-between px-3 py-2 cursor-pointer hover:bg-background/50"
           style={{ paddingLeft: depth * 16 + 12 }}
         >
           <div className="w-6 h-6 p-2 rounded-sm flex items-center justify-center hover:bg-foreground/10">
@@ -44,7 +48,14 @@ export default function PageItem({
               </motion.div>
             </span>
           </div>
-          <span>{page.title}</span>
+          <Link href={`/pages/${page.id}`} className="flex-1">
+            {page.title}
+          </Link>
+          <span className="hidden hover:block">
+            <Button variant="ghost" size="icon" className="p-1">
+              <Plus size={14} />
+            </Button>
+          </span>
         </div>
       </motion.div>
 
