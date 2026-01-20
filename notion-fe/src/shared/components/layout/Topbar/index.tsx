@@ -62,9 +62,6 @@ export function Topbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* <AddMemberDialog /> */}
-          <h1>AddMember</h1>
-
           {/* Theme Toggle */}
           <ModeToggle />
 
@@ -107,13 +104,6 @@ export function Topbar() {
                     >
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => toast.info("Settings coming soon")}
-                      className="cursor-pointer"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

@@ -9,7 +9,6 @@ import { CreateWorkspaceData, createWorkspaceSchema } from "../../validator";
 import { Form } from "@/shared/components/ui/form";
 import FormFieldCustom from "@/features/auth/components/FormFieldCustom";
 import { Mail } from "lucide-react";
-import { da } from "date-fns/locale";
 
 interface CreateWorkSpaceFormProps {
   isOpen: boolean;
@@ -39,17 +38,17 @@ export default function CreateWorkSpaceForm({
   } = form;
   return (
     <BaseModal
-      title="Create new Workspace"
+      title="Tạo workspace mới"
       open={isOpen}
       onOpenChange={onOpenChange}
     >
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid w-full items-center gap-4 text-black">
+          <div className="grid w-full items-center gap-4">
             <FormFieldCustom
               control={form.control}
               name="name"
-              label="Name workspace"
+              label="Tên workspace"
               placeholder="My workspace"
               type="text"
               icon={<Mail />}
@@ -57,9 +56,9 @@ export default function CreateWorkSpaceForm({
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Hủy
             </Button>
-            <Button type="submit">Create</Button>
+            <Button type="submit">Tạo</Button>
           </div>
         </form>
       </Form>
