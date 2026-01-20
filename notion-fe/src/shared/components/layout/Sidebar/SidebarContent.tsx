@@ -67,7 +67,8 @@ export default function SidebarContent({
   // Handle Open modal
   const { openModal, closeModal } = useModalStore();
   // Fetch data workspace and set into useWorkspaceStore
-  const { setWorkspace, workspaces } = useWorkspaceStore();
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const setWorkspace = useWorkspaceStore((state) => state.setWorkspace);
   const {
     workspaces: data,
     isLoading,
@@ -81,7 +82,7 @@ export default function SidebarContent({
     <div className="flex h-screen flex-col bg-sidebar border-r border-sidebar-border">
       <div className="p-3 border-b border-sidebar-border">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-semibold">NotionX</h1>
+          <h1 className="text-lg font-semibold text-center w-full">NotionX</h1>
           <Button
             asChild
             variant="ghost"
