@@ -53,4 +53,12 @@ export default class UserRepo {
 
     return newUser;
   }
+
+  async getUserById(userId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+  }
 }

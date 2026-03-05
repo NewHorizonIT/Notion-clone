@@ -228,4 +228,15 @@ export default class AuthController {
       data: null,
     }).send(res);
   };
+
+  public me = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user.userId;
+    const user = await this.authService.getMe(userId);
+
+    new SuccessResponse({
+      message: "Get me Success",
+      statusCode: StatusCodes.OK,
+      data: user,
+    }).send(res);
+  };
 }

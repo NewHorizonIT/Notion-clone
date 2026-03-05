@@ -56,6 +56,15 @@ class BlockRepo {
       },
     });
   }
+
+  async softDeleteBlockByID(blockID: string): Promise<Block> {
+    return await this.prisma.block.update({
+      where: { id: blockID },
+      data: {
+        isDeleted: true,
+      },
+    });
+  }
 }
 
 export default BlockRepo;

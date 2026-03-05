@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { Block } from "../generated/prisma";
 import BlockRepo from "../repositories/block.repo";
-import { CreateBlockData } from "../schemas/blog.schema";
+import { CreateBlockData, UpdateBlockData } from "../schemas/blog.schema";
 import { ErrorResponse } from "../response/response";
 import { ReasonPhrases, StatusCodes } from "../response";
 import PageRepo from "../repositories/page.repo";
@@ -110,6 +110,56 @@ class BlockService {
       });
     }
     return childrenBlocks;
+  }
+
+  async updateBlock(
+    blockID: string,
+    blockData: Partial<UpdateBlockData>,
+  ): Promise<Block> {
+    const blockHolder = await this.blockRepo.getBlockByID(blockID);
+    if (!blockHolder) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: `Block ${blockID} not found`,
+        error: ReasonPhrases.NOT_FOUND,
+      });
+    }
+
+    const updatedBlock = await this.blockRepo.updateBlockByID(
+      blockID,
+      blockData,
+    );
+    if (!updatedBlock) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "Update block failed",
+        error: ReasonPhrases.BAD_REQUEST,
+      });
+    }
+
+    return updatedBlock;
+  }
+
+  async deleteBlock(blockID: string): Promise<Block> {
+    const blockHolder = await this.blockRepo.getBlockByID(blockID);
+    if (!blockHolder) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: `Block ${blockID} not found`,
+        error: ReasonPhrases.NOT_FOUND,
+      });
+    }
+
+    const deletedBlock = await this.blockRepo.softDeleteBlockByID(blockID);
+    if (!deletedBlock) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "Delete block failed",
+        error: ReasonPhrases.BAD_REQUEST,
+      });
+    }
+
+    return deletedBlock;
   }
 }
 

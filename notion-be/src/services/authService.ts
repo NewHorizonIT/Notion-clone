@@ -192,4 +192,20 @@ export default class AuthService {
       userId: user?.id,
     };
   }
+
+  async getMe(userId: string): Promise<UserResponseDTO> {
+    const user = await this.userRepo.getUserById(userId);
+
+    if (!user) {
+      throw new ErrorResponse({
+        message: "Get me fail",
+        statusCode: StatusCodes.UNAUTHORIZED,
+        error: ErrorCodes.USER_NOT_FOUND,
+      });
+    }
+
+    return {
+      user,
+    };
+  }
 }

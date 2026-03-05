@@ -18,7 +18,9 @@ blockRouter.get(
 // GET - /blocks/:id - Get block by ID
 blockRouter.get("/:id", asyncHandler(blockController.getBlockByID));
 // PUT - /blocks/:id - Update block
+blockRouter.put("/:id", asyncHandler(blockController.updateBlock));
 // DELETE - /blocks/:id - Delete soft block
+blockRouter.delete("/:id", asyncHandler(blockController.deleteBlock));
 // PATCH - /blocks/:id/move - Move block
 // PATCH - /blocks/:id/restore - Restore block
 

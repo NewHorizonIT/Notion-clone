@@ -29,5 +29,6 @@ export function authenticate(
     next();
   } catch (error) {
     console.error("[Authetication]: ", error);
+    next(error);
   }
 }
