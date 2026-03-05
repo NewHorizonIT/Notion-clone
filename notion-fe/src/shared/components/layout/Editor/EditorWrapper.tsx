@@ -1,4 +1,12 @@
 "use client";
 import dynamic from "next/dynamic";
 
-export const Editor = dynamic(() => import("./Editor"), { ssr: false });
+interface EditorProps {
+  pageId: string;
+}
+
+const EditorComponent = dynamic(() => import("./Editor"), { ssr: false });
+
+export function Editor({ pageId }: EditorProps) {
+  return <EditorComponent pageId={pageId} />;
+}

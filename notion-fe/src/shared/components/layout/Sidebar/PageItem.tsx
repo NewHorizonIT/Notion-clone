@@ -1,88 +1,77 @@
 "use client";
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronRight, Plus, StickyNote } from "lucide-react";
-import { useState } from "react";
-import { Button } from "../../ui/button";
+import { Page, useDeletePage } from "@/features/page";
+import { motion } from "framer-motion";
+import { MoreHorizontal, StickyNote, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "../../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
 
-export interface Page {
-  id: string;
-  title: string;
-  icon?: string;
-  children?: Page[];
+interface PageItemProps {
+  page: Page;
+  onDeleted?: () => void;
 }
 
-export default function PageItem({
-  page,
-  depth = 0,
-}: {
-  page: Page;
-  depth?: number;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const handleExpand = () => setExpanded(!expanded);
-  // Naviagte to page
+export default function PageItem({ page, onDeleted }: PageItemProps) {
+  const pathname = usePathname();
+  const isActive = pathname === `/pages/${page.id}`;
+  const { deletePage, isLoading: isDeleting } = useDeletePage();
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await deletePage(page.id, page.workspaceId);
+    onDeleted?.();
+  };
 
   return (
-    <div key={page.id}>
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2 }}
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div
+        className={`group flex gap-2 items-center justify-between px-3 py-2 cursor-pointer hover:bg-background/50 rounded-md ${
+          isActive ? "bg-background/70" : ""
+        }`}
       >
-        {/* Render list page of head */}
-        <div
-          className="group flex gap-4 items-center justify-between px-3 py-2 cursor-pointer hover:bg-background/50"
-          style={{ paddingLeft: depth * 16 + 12 }}
-        >
-          <div className="w-6 h-6 p-2 rounded-sm flex items-center justify-center hover:bg-foreground/10">
-            <span className="block group-hover:hidden">
-              {page.icon || <StickyNote size={16} />}
-            </span>
-            <span className="hidden group-hover:block" onClick={handleExpand}>
-              <motion.div
-                animate={{ rotate: expanded ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronRight size={18} />
-              </motion.div>
-            </span>
-          </div>
-          <Link href={`/pages/${page.id}`} className="flex-1">
-            {page.title}
-          </Link>
-          <span className="hidden hover:block">
-            <Button variant="ghost" size="icon" className="p-1">
-              <Plus size={14} />
-            </Button>
-          </span>
+        <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+          {page.icon ? (
+            <span>{page.icon}</span>
+          ) : (
+            <StickyNote size={16} className="text-muted-foreground" />
+          )}
         </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Render child pages here */}
-            {page.children ? (
-              page.children.map((child) => (
-                <PageItem key={child.id} page={child} depth={depth + 1} />
-              ))
-            ) : (
-              <p
-                className="pl-8 py-2 text-sm text-muted-foreground"
-                style={{ paddingLeft: depth * 16 + 12 }}
-              >
-                No sub-pages
-              </p>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        <Link href={`/pages/${page.id}`} className="flex-1 truncate text-sm">
+          {page.title || "Untitled"}
+        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <MoreHorizontal size={14} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Move to Trash
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </motion.div>
   );
 }
