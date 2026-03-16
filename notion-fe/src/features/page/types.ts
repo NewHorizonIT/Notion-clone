@@ -23,14 +23,11 @@ export interface UpdatePageData {
   description?: string;
 }
 
-export interface PageResponse {
+export interface ApiResponse<T> {
   statusCode: number;
   message: string;
-  data: Page;
+  data: T;
 }
 
-export interface PagesResponse {
-  statusCode: number;
-  message: string;
-  data: Page[];
-}
+export type PageResponse = ApiResponse<Page>;
+export type PagesResponse = ApiResponse<Page[]>;

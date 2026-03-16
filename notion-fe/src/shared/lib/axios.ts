@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { InternalAxiosRequestConfig } from "axios";
 import getDeviceId from "../utils/getDeviceId";
 import useAuthStore from "../store/useAuthStore";
 
@@ -8,10 +9,14 @@ const API_BASE_URL =
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    "X-Api-Key": process.env.NEXT_PUBLIC_API_KEY,
+    "X-Api-Key": process.env.NEXT_PUBLIC_API_KEY || "your_dev_api_key",
   },
   withCredentials: true, // Enable cookies for refresh token
 });
+
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
 
 api.interceptors.request.use((config) => {
   // Set up device id for request
@@ -29,9 +34,19 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config as RetriableRequestConfig | undefined;
+    const requestUrl = originalRequest?.url ?? "";
+    const isAuthEndpoint =
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/register") ||
+      requestUrl.includes("/auth/refresh-token");
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
       try {
         const deviceId = getDeviceId();
@@ -51,6 +66,7 @@ api.interceptors.response.use(
         const newToken = data.data?.accessToken || data.accessToken;
         useAuthStore.getState().setToken(newToken);
 
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
 
         // Retry original request with new token

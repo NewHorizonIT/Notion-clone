@@ -1,39 +1,6 @@
 import api from "@/shared/lib/axios";
 import { CreateWorkspaceData } from "./validator";
-
-// Types
-export interface Workspace {
-  id: string;
-  name: string;
-  ownerId: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateWorkspaceResponse {
-  statusCode: number;
-  message: string;
-  data: Workspace;
-}
-
-export interface GetWorkspacesResponse {
-  statusCode: number;
-  message: string;
-  data: Workspace[];
-}
-
-export interface GetWorkspaceResponse {
-  statusCode: number;
-  message: string;
-  data: Workspace;
-}
-
-export interface UpdateWorkspaceResponse {
-  statusCode: number;
-  message: string;
-  data: Workspace;
-}
+import { ApiResponse, Workspace } from "./types";
 
 // API Endpoints
 /**
@@ -42,14 +9,16 @@ export interface UpdateWorkspaceResponse {
  * @returns Created workspace data
  */
 export const createWorkspace = (workspaceData: CreateWorkspaceData) =>
-  api.post("/workspaces", workspaceData).then((res) => res.data);
+  api
+    .post<ApiResponse<Workspace>>("/workspaces", workspaceData)
+    .then((res) => res.data);
 
 /**
  * Get list of all workspaces for the current user
  * @returns List of workspaces
  */
 export const getListWorkspace = () =>
-  api.get("/workspaces").then((res) => res.data);
+  api.get<ApiResponse<Workspace[]>>("/workspaces").then((res) => res.data);
 
 /**
  * Get detail of a specific workspace by ID
@@ -57,7 +26,7 @@ export const getListWorkspace = () =>
  * @returns Workspace detail
  */
 export const getDetailWorkspace = (id: string) =>
-  api.get(`/workspaces/${id}`).then((res) => res.data);
+  api.get<ApiResponse<Workspace>>(`/workspaces/${id}`).then((res) => res.data);
 
 /**
  * Update a workspace
@@ -67,5 +36,8 @@ export const getDetailWorkspace = (id: string) =>
  */
 export const updateWorkspace = (
   id: string,
-  workspaceData: Partial<CreateWorkspaceData>
-) => api.put(`/workspaces/${id}`, workspaceData).then((res) => res.data);
+  workspaceData: Partial<CreateWorkspaceData>,
+) =>
+  api
+    .put<ApiResponse<Workspace>>(`/workspaces/${id}`, workspaceData)
+    .then((res) => res.data);

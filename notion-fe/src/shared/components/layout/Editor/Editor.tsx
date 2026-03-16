@@ -1,13 +1,13 @@
 "use client";
 import "@/app/globals.css";
+import { createBlock, deleteBlock, updateBlock } from "@/features/block/api";
+import { useGetBlocksByPage } from "@/features/block/hooks";
 import {
-  Block as ApiBlock,
   BlockType,
-  createBlock,
-  deleteBlock,
-  updateBlock,
-  useGetBlocksByPage,
-} from "@/features/block";
+  type Block as ApiBlock,
+  type CreateBlockData,
+  type UpdateBlockData,
+} from "@/features/block/types";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/core/style.css";
 import { Block, PartialBlock } from "@blocknote/core";
@@ -22,12 +22,14 @@ interface EditorProps {
   pageId: string;
 }
 
+type ApiContent = Record<string, unknown>;
+
 // Convert API block to BlockNote block format
 function apiBlockToEditorBlock(apiBlock: ApiBlock): PartialBlock {
-  const content = apiBlock.content as Record<string, unknown> | null;
+  const content = apiBlock.content as ApiContent | null;
   return {
     id: apiBlock.id,
-    type: apiBlock.type.toLowerCase() as Block["type"],
+    type: (apiBlock.type.toLowerCase() as Block["type"]) || "paragraph",
     props: content?.props as Record<string, unknown> | undefined,
     content: content?.content as Block["content"] | undefined,
     children: content?.children as PartialBlock[] | undefined,
@@ -37,7 +39,7 @@ function apiBlockToEditorBlock(apiBlock: ApiBlock): PartialBlock {
 // Convert BlockNote block to API format
 function editorBlockToApiFormat(block: Block): {
   type: BlockType;
-  content: Record<string, unknown>;
+  content: ApiContent;
 } {
   const typeMap: Record<string, BlockType> = {
     paragraph: BlockType.PARAGRAPH,
@@ -51,6 +53,8 @@ function editorBlockToApiFormat(block: Block): {
     file: BlockType.FILE,
     table: BlockType.TABLE,
     codeBlock: BlockType.CODE,
+    quote: BlockType.QUOTE,
+    divider: BlockType.DIVIDER,
   };
 
   return {
@@ -68,21 +72,20 @@ export default function Editor({ pageId }: EditorProps) {
   const { blocks: apiBlocks, isLoading } = useGetBlocksByPage(pageId);
   const [isInitialized, setIsInitialized] = useState(false);
   const blocksMapRef = useRef<Map<string, ApiBlock>>(new Map());
-  const pendingChangesRef = useRef(false);
 
   // Initialize editor with empty document
   const editor = useCreateBlockNote();
 
   // Load blocks from API into editor
   useEffect(() => {
-    if (!isLoading && apiBlocks && !isInitialized && editor) {
+    if (!isLoading && !isInitialized && editor) {
       // Update blocks map
       blocksMapRef.current.clear();
       apiBlocks.forEach((block) => blocksMapRef.current.set(block.id, block));
 
       if (apiBlocks.length > 0) {
         const editorBlocks = apiBlocks
-          .sort((a, b) => a.position - b.position)
+          .sort((a, b) => a.orderIndex - b.orderIndex)
           .map(apiBlockToEditorBlock);
 
         try {
@@ -100,7 +103,6 @@ export default function Editor({ pageId }: EditorProps) {
     if (!isInitialized) return;
 
     const currentIds = new Set(blocks.map((b) => b.id));
-    const existingIds = new Set(blocksMapRef.current.keys());
 
     // Find new, updated, and deleted blocks
     for (let i = 0; i < blocks.length; i++) {
@@ -111,12 +113,14 @@ export default function Editor({ pageId }: EditorProps) {
       if (!existingBlock) {
         // Create new block
         try {
-          const response = await createBlock({
+          const payload: CreateBlockData = {
             pageId,
             type: apiFormat.type,
             content: apiFormat.content,
-            position: i,
-          });
+            orderIndex: i,
+            parentId: null,
+          };
+          const response = await createBlock(payload);
           if (response?.data) {
             blocksMapRef.current.set(block.id, response.data);
           }
@@ -128,15 +132,21 @@ export default function Editor({ pageId }: EditorProps) {
         const contentChanged =
           JSON.stringify(existingBlock.content) !==
           JSON.stringify(apiFormat.content);
-        const positionChanged = existingBlock.position !== i;
+        const orderChanged = existingBlock.orderIndex !== i;
+        const typeChanged = existingBlock.type !== apiFormat.type;
 
-        if (contentChanged || positionChanged) {
+        if (contentChanged || orderChanged || typeChanged) {
           try {
-            await updateBlock(existingBlock.id, {
+            const payload: UpdateBlockData = {
               type: apiFormat.type,
               content: apiFormat.content,
-              position: i,
-            });
+              orderIndex: i,
+              parentId: null,
+            };
+            const updated = await updateBlock(existingBlock.id, payload);
+            if (updated?.data) {
+              blocksMapRef.current.set(block.id, updated.data);
+            }
           } catch (error) {
             console.error("Failed to update block:", error);
           }
@@ -145,23 +155,20 @@ export default function Editor({ pageId }: EditorProps) {
     }
 
     // Delete removed blocks
-    for (const existingId of existingIds) {
-      if (!currentIds.has(existingId)) {
+    for (const [clientId, serverBlock] of blocksMapRef.current.entries()) {
+      if (!currentIds.has(clientId)) {
         try {
-          await deleteBlock(existingId);
-          blocksMapRef.current.delete(existingId);
+          await deleteBlock(serverBlock.id);
+          blocksMapRef.current.delete(clientId);
         } catch (error) {
           console.error("Failed to delete block:", error);
         }
       }
     }
-
-    pendingChangesRef.current = false;
   }, 1000);
 
   const handleChange = useCallback(() => {
     if (!isInitialized) return;
-    pendingChangesRef.current = true;
     syncToApi(editor.document);
   }, [editor, isInitialized, syncToApi]);
 

@@ -7,6 +7,7 @@ interface WorkspaceData {
 }
 
 type WorkspaceAction = {
+  setHasHydrated: (status: boolean) => void;
   setWorkspace: (data: WorkspaceData[]) => void;
   updateWorkspace: (data: WorkspaceData) => void;
   deleteWorkspace: (data: WorkspaceData) => void;
@@ -15,6 +16,7 @@ type WorkspaceAction = {
 };
 
 type WorkspaceState = {
+  hasHydrated: boolean;
   workspaces: WorkspaceData[];
   currentWorkspace: WorkspaceData | null;
 };
@@ -22,17 +24,29 @@ type WorkspaceState = {
 const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>()(
   persist(
     (set, get) => ({
+      hasHydrated: false,
       workspaces: [],
       currentWorkspace: null,
+      setHasHydrated: (status: boolean) => set({ hasHydrated: status }),
 
-      setWorkspace: (data: WorkspaceData[]) => set({ workspaces: data }),
+      setWorkspace: (data: WorkspaceData[]) => {
+        const current = get().currentWorkspace;
+        const nextCurrent = current
+          ? data.find((workspace) => workspace.id === current.id) || null
+          : data[0] || null;
+
+        set({
+          workspaces: data,
+          currentWorkspace: nextCurrent,
+        });
+      },
 
       addWorkspace: (data: WorkspaceData) =>
         set({ workspaces: [...get().workspaces, data] }),
 
       deleteWorkspace: (data: WorkspaceData) => {
         const updatedWorkspaces = get().workspaces.filter(
-          (workspace) => workspace.id !== data.id
+          (workspace) => workspace.id !== data.id,
         );
         const current = get().currentWorkspace;
         set({
@@ -43,7 +57,7 @@ const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>()(
 
       updateWorkspace: (data: WorkspaceData) => {
         const updatedWorkspaces = get().workspaces.map((w) =>
-          w.id === data.id ? data : w
+          w.id === data.id ? data : w,
         );
         const current = get().currentWorkspace;
         set({
@@ -57,11 +71,14 @@ const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>()(
     }),
     {
       name: "workspace-storage",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       partialize: (state) => ({
         currentWorkspace: state.currentWorkspace,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export default useWorkspaceStore;

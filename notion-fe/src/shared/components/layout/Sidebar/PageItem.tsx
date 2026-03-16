@@ -1,9 +1,11 @@
 "use client";
-import { Page, useDeletePage } from "@/features/page";
+import type { Page } from "@/features/page/types";
+import { useDeletePage } from "@/features/page/hooks";
 import { motion } from "framer-motion";
 import { MoreHorizontal, StickyNote, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "../../ui/button";
 import {
   DropdownMenu,
@@ -20,13 +22,18 @@ interface PageItemProps {
 export default function PageItem({ page, onDeleted }: PageItemProps) {
   const pathname = usePathname();
   const isActive = pathname === `/pages/${page.id}`;
-  const { deletePage, isLoading: isDeleting } = useDeletePage();
+  const { remove, isLoading: isDeleting } = useDeletePage();
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await deletePage(page.id, page.workspaceId);
-    onDeleted?.();
+    try {
+      await remove(page.id, page.workspaceId);
+      onDeleted?.();
+      toast.success("Page moved to trash");
+    } catch {
+      toast.error("Failed to move page to trash");
+    }
   };
 
   return (

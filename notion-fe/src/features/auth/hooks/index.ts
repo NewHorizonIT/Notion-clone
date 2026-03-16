@@ -10,37 +10,54 @@ import {
 import { LoginData, SignupData } from "../validator";
 import useAuthStore from "@/shared/store/useAuthStore";
 import { useCallback } from "react";
+import { mutate } from "swr";
 
 export const useLogin = () => {
-  const { trigger, data, error, isMutating } = useSWRMutation(
+  const { trigger, error, isMutating } = useSWRMutation(
     "/auth/login",
     (_, { arg }: { arg: LoginData }) => loginUser(arg),
   );
 
+  const login = useCallback(
+    async (payload: LoginData) => {
+      const result = await trigger(payload);
+      mutate("/auth/me");
+      return result;
+    },
+    [trigger],
+  );
+
   return {
-    user: data,
     isLoading: isMutating,
-    isError: error,
-    mutateUser: trigger,
+    isError: !!error,
+    login,
   };
 };
 
 export const useRegister = () => {
-  const { trigger, data, error, isMutating } = useSWRMutation(
+  const { trigger, error, isMutating } = useSWRMutation(
     "/auth/register",
     (_, { arg }: { arg: SignupData }) => registerUser(arg),
   );
 
+  const register = useCallback(
+    async (payload: SignupData) => {
+      const result = await trigger(payload);
+      mutate("/auth/me");
+      return result;
+    },
+    [trigger],
+  );
+
   return {
-    user: data,
     isLoading: isMutating,
-    isError: error,
-    mutateUser: trigger,
+    isError: !!error,
+    register,
   };
 };
 
 export const useResetPassword = () => {
-  const { trigger, data, error, isMutating } = useSWRMutation(
+  const { trigger, error, isMutating } = useSWRMutation(
     "/auth/reset-password",
     (_, { arg }: { arg: { token: string; password: string } }) => {
       const { token, password } = arg;
@@ -48,11 +65,17 @@ export const useResetPassword = () => {
     },
   );
 
+  const reset = useCallback(
+    async (payload: { token: string; password: string }) => {
+      return trigger(payload);
+    },
+    [trigger],
+  );
+
   return {
-    user: data,
     isLoading: isMutating,
     isError: !!error,
-    mutateResetPassword: trigger,
+    reset,
   };
 };
 
@@ -67,9 +90,11 @@ export const useLogout = () => {
     try {
       await trigger();
       handleLogout();
+      mutate("/auth/me", null, false);
     } catch (err) {
       // Still logout locally even if API fails
       handleLogout();
+      mutate("/auth/me", null, false);
       throw err;
     }
   }, [trigger, handleLogout]);
@@ -82,19 +107,24 @@ export const useLogout = () => {
 };
 
 export const useCurrentUser = () => {
-  const token = useAuthStore((state) => state.token);
+  const isLogin = useAuthStore((state) => state.isLogin);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const {
     data,
     error,
     isLoading,
     mutate: refetch,
-  } = useSWR(token ? "/auth/me" : null, () => getCurrentUser(), {
-    revalidateOnFocus: false,
-  });
+  } = useSWR(
+    hasHydrated && isLogin ? "/auth/me" : null,
+    () => getCurrentUser(),
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   return {
-    user: data?.data,
+    user: data?.data?.user,
     isLoading,
     isError: !!error,
     refetch,

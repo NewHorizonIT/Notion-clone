@@ -12,11 +12,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRegister } from "../hooks";
 import { toast } from "sonner";
+import useAuthStore from "@/shared/store/useAuthStore";
 
 type SignupInput = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -26,14 +28,16 @@ export default function SignupForm() {
     },
   });
 
-  const { mutateUser, isError } = useRegister();
-  const onSubmit = (data: SignupInput) => {
-    mutateUser(data);
-    if (isError) {
-      toast.error("Login failed");
+  const { register, isLoading } = useRegister();
+  const onSubmit = async (data: SignupInput) => {
+    try {
+      const response = await register(data);
+      setAuth(response.data.token.accessToken, response.data.user);
+      toast.success("Register success");
+      router.replace("/");
+    } catch {
+      toast.error("Register failed");
     }
-    toast.success("Register Success");
-    router.push("/");
   };
 
   return (
@@ -66,8 +70,9 @@ export default function SignupForm() {
           type="submit"
           className="w-full cursor-pointer"
           variant={"default"}
+          disabled={isLoading}
         >
-          Signup
+          {isLoading ? "Loading..." : "Signup"}
         </Button>
         <div className="text-white">
           You have registered?{" "}

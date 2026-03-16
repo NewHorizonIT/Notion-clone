@@ -3,9 +3,12 @@ import { validateBody } from "../middlewares";
 import { CreateWorkSpaceSchema } from "../schemas/workspace.schema";
 import { container } from "tsyringe";
 import WorkSpaceController from "../controllers/workspace.controller";
+import { authenticate } from "../middlewares/authentication";
 const workspaceRouter = express.Router();
 
 const workspaceController = container.resolve(WorkSpaceController);
+
+workspaceRouter.use(authenticate);
 
 // POST workspaces → Create workspace
 workspaceRouter.post(

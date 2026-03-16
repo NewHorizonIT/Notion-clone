@@ -8,11 +8,11 @@ export const signupSchema = loginSchema.extend({
   name: z.string().min(5, "Tên phải trên 5 kí tự").trim(),
 });
 
-export const resetPasswordSchema = z.object({
+export const forgetPasswordSchema = z.object({
   email: z.string().email("Email không hợp lê"),
 });
 
-export const forgetPasswordSchema = z.object({
+export const resetPasswordSchema = z.object({
   password: z.string().min(5, "Mật khẩu không được dưới 5 kí tự").trim(),
 });
 

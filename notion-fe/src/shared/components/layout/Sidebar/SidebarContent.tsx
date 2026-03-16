@@ -1,14 +1,13 @@
 "use client";
-import { useCreatePage, useGetPagesByWorkspace } from "@/features/page";
-import {
-  useCreateWorkspace,
-  useGetListWorkspace,
-} from "@/features/workspace/hooks";
+import { useCreatePage, useGetPagesByWorkspace } from "@/features/page/hooks";
+import { Workspace } from "@/features/workspace/types";
+import { useGetListWorkspace } from "@/features/workspace/hooks";
 import { useModalStore } from "@/shared/store/useModalStore";
 import useWorkspaceStore from "@/shared/store/useWorkspaceStore";
 import { SelectArrow } from "@radix-ui/react-select";
 import { Loader2, Plus, Settings, X } from "lucide-react";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
 import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
@@ -27,12 +26,12 @@ export default function SidebarContent({
 }: {
   setIsMobileOpen?: (open: boolean) => void;
 }) {
-  // Handle create workspace
-  const { workspace, isError, mutateWorkspace } = useCreateWorkspace();
-  // Handle Open modal
-  const { openModal, closeModal } = useModalStore();
+  const router = useRouter();
+  // Handle open modal
+  const { openModal } = useModalStore();
   // Fetch data workspace and set into useWorkspaceStore
   const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const hasHydrated = useWorkspaceStore((state) => state.hasHydrated);
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace);
   const setCurrentWorkspace = useWorkspaceStore(
@@ -41,8 +40,10 @@ export default function SidebarContent({
   const {
     workspaces: data,
     isLoading: isLoadingWorkspaces,
-    isError: errorGetListWorkspace,
+    isError: hasWorkspaceError,
   } = useGetListWorkspace();
+
+  const workspaceOptions = useMemo(() => workspaces, [workspaces]);
 
   // Fetch pages for current workspace
   const {
@@ -52,16 +53,44 @@ export default function SidebarContent({
   } = useGetPagesByWorkspace(currentWorkspace?.id || "");
 
   // Create page
-  const { createPage, isLoading: isCreatingPage } = useCreatePage();
+  const { create, isLoading: isCreatingPage } = useCreatePage();
 
   useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
     if (data) {
-      setWorkspace(data);
-      if (!currentWorkspace && data.length > 0) {
-        setCurrentWorkspace(data[0]);
+      const isSameWorkspaceList =
+        data.length === workspaces.length &&
+        data.every((workspace, index) => {
+          const current = workspaces[index];
+          return current && current.id === workspace.id;
+        });
+
+      if (!isSameWorkspaceList) {
+        setWorkspace(data);
       }
     }
-  }, [data, setWorkspace, currentWorkspace, setCurrentWorkspace]);
+  }, [data, hasHydrated, setWorkspace, workspaces]);
+
+  useEffect(() => {
+    if (!hasHydrated || isLoadingWorkspaces) {
+      return;
+    }
+
+    if (hasWorkspaceError) {
+      toast.error("Failed to load workspaces");
+    }
+  }, [hasHydrated, isLoadingWorkspaces, hasWorkspaceError]);
+
+  const handleWorkspaceCreated = (workspace: Workspace) => {
+    setCurrentWorkspace({ id: workspace.id, name: workspace.name });
+  };
+
+  const handleWorkspaceUpdated = (workspace: Workspace) => {
+    setCurrentWorkspace({ id: workspace.id, name: workspace.name });
+  };
 
   const handleCreatePage = async () => {
     if (!currentWorkspace) {
@@ -69,10 +98,13 @@ export default function SidebarContent({
       return;
     }
     try {
-      await createPage({ workspaceId: currentWorkspace.id });
+      const result = await create({ workspaceId: currentWorkspace.id });
       refreshPages();
       toast.success("Page created");
-    } catch (error) {
+      if (result.data?.id) {
+        router.push(`/pages/${result.data.id}`);
+      }
+    } catch {
       toast.error("Failed to create page");
     }
   };
@@ -84,13 +116,31 @@ export default function SidebarContent({
     }
   };
 
+  const handleOpenCreateWorkspace = () => {
+    openModal("create-workspace", {
+      onSuccess: handleWorkspaceCreated,
+    });
+  };
+
+  const handleOpenEditWorkspace = () => {
+    if (!currentWorkspace) {
+      toast.error("Please select a workspace first");
+      return;
+    }
+
+    openModal("edit-workspace", {
+      workspaceId: currentWorkspace.id,
+      initialName: currentWorkspace.name,
+      onSuccess: handleWorkspaceUpdated,
+    });
+  };
+
   return (
     <div className="flex h-screen flex-col bg-sidebar border-r border-sidebar-border">
       <div className="p-3 border-b border-sidebar-border">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-semibold text-center w-full">NotionX</h1>
           <Button
-            asChild
             variant="ghost"
             size="icon"
             className="lg:hidden h-8 w-8"
@@ -99,38 +149,48 @@ export default function SidebarContent({
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <Select
-          value={currentWorkspace?.id || ""}
-          onValueChange={handleWorkspaceChange}
-        >
-          <SelectTrigger className="w-full">
-            <span className="text-sm truncate">
-              {currentWorkspace?.name || "Select Workspace"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Workspace</SelectLabel>
-              {workspaces.map((w) => (
-                <SelectItem value={w.id} className="cursor-pointer" key={w.id}>
-                  {w.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-            <SelectArrow />
-            <SelectGroup>
-              <Button
-                className="w-full cursor-pointer"
-                variant="ghost"
-                size="sm"
-                onClick={() => openModal("create-workspace")}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Workspace
-              </Button>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        {isLoadingWorkspaces ? (
+          <div className="flex items-center justify-center py-2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <Select
+            value={currentWorkspace?.id || ""}
+            onValueChange={handleWorkspaceChange}
+          >
+            <SelectTrigger className="w-full">
+              <span className="text-sm truncate">
+                {currentWorkspace?.name || "Select Workspace"}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Workspace</SelectLabel>
+                {workspaceOptions.map((w) => (
+                  <SelectItem
+                    value={w.id}
+                    className="cursor-pointer"
+                    key={w.id}
+                  >
+                    {w.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectArrow />
+              <SelectGroup>
+                <Button
+                  className="w-full cursor-pointer"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleOpenCreateWorkspace}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Workspace
+                </Button>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <ScrollArea className="flex-1 min-h-0 px-2 py-2">
@@ -169,10 +229,11 @@ export default function SidebarContent({
         <Button
           variant="ghost"
           className="w-full justify-start gap-2 hover:bg-sidebar-accent"
-          onClick={() => toast.info("Settings coming soon")}
+          onClick={handleOpenEditWorkspace}
+          disabled={!currentWorkspace}
         >
           <Settings className="h-4 w-4" />
-          <span className="text-sm">Settings</span>
+          <span className="text-sm">Workspace settings</span>
         </Button>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import api from "@/shared/lib/axios";
 import {
-  Page,
   PageResponse,
   PagesResponse,
   CreatePageData,

@@ -13,13 +13,21 @@ export function ForgetPasswordModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(email);
-    forgetPassword(email);
-    toast.success("Send email Success");
-    onOpenChange(false);
+    try {
+      setIsSubmitting(true);
+      await forgetPassword(email);
+      toast.success("Reset password email sent");
+      onOpenChange(false);
+      setEmail("");
+    } catch {
+      toast.error("Failed to send reset email");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -35,8 +43,8 @@ export function ForgetPasswordModal({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Button type="submit" className="w-full">
-          Gửi link reset password
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Đang gửi..." : "Gửi link reset password"}
         </Button>
       </form>
     </BaseModal>

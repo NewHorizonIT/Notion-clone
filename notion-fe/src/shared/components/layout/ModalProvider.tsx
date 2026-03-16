@@ -14,11 +14,10 @@ export function ModalProvider() {
         <ForgetPasswordModal open onOpenChange={closeModal} {...modalProps} />
       )}
       {modalType === "create-workspace" && (
-        <CreateWorkSpaceForm
-          isOpen={open}
-          onOpenChange={closeModal}
-          {...modalProps}
-        />
+        <CreateWorkSpaceForm isOpen onOpenChange={closeModal} {...modalProps} />
+      )}
+      {modalType === "edit-workspace" && (
+        <CreateWorkSpaceForm isOpen onOpenChange={closeModal} {...modalProps} />
       )}
     </>
   );

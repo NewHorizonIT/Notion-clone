@@ -1,10 +1,11 @@
 "use client";
 
-import { Page, useUpdatePage } from "@/features/page";
+import type { Page } from "@/features/page/types";
+import { useUpdatePage } from "@/features/page/hooks";
 import { cn } from "@/shared/lib/utils";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -17,25 +18,32 @@ interface PageLayoutProps {
 
 export function PageLayout({ page }: PageLayoutProps) {
   const [titleValue, setTitleValue] = useState(page.title || "");
-  const [showRightSidebar, setShowRightSidebar] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(
     page.coverUrl || null,
   );
-  const { trigger: updatePage } = useUpdatePage(page.id);
+  const { update } = useUpdatePage(page.id);
   const isInitialMount = useRef(true);
+  const lastPersistedTitle = useRef(page.title || "");
 
   // Update local state when page changes
   useEffect(() => {
     setTitleValue(page.title || "");
     setImageUrl(page.coverUrl || null);
+    lastPersistedTitle.current = page.title || "";
   }, [page.title, page.coverUrl]);
 
   // Debounced save for title
   const debouncedSaveTitle = useDebounceCallback(async (title: string) => {
+    const normalizedTitle = title.trim();
+    if (!normalizedTitle || normalizedTitle === lastPersistedTitle.current) {
+      return;
+    }
+
     try {
-      await updatePage({ title });
-    } catch (error) {
-      console.error("Failed to save title:", error);
+      await update({ title: normalizedTitle });
+      lastPersistedTitle.current = normalizedTitle;
+    } catch {
+      // Keep local typing smooth and retry on next valid edit.
     }
   }, 500);
 

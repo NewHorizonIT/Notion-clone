@@ -11,17 +11,21 @@ export interface Block {
   children?: Block[];
 }
 
-export type BlockType =
-  | "paragraph"
-  | "heading"
-  | "bulletedListItem"
-  | "numberedListItem"
-  | "checkListItem"
-  | "codeBlock"
-  | "image"
-  | "table"
-  | "quote"
-  | "divider";
+export enum BlockType {
+  PARAGRAPH = "paragraph",
+  HEADING = "heading",
+  BULLET_LIST = "bulletedListItem",
+  NUMBERED_LIST = "numberedListItem",
+  TODO = "checkListItem",
+  CODE = "codeBlock",
+  IMAGE = "image",
+  TABLE = "table",
+  QUOTE = "quote",
+  DIVIDER = "divider",
+  VIDEO = "video",
+  AUDIO = "audio",
+  FILE = "file",
+}
 
 export interface CreateBlockData {
   pageId: string;

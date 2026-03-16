@@ -1,3 +1,6 @@
+"use client";
+
+import { GuestOnly } from "@/features/auth/components/AuthGuards";
 import React from "react";
 
 export default function AuthLayout({
@@ -6,8 +9,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="auth-container">
-      <div className="auth-form">{children}</div>;
-    </div>
+    <GuestOnly>
+      <div className="auth-container">
+        <div className="auth-form">{children}</div>
+      </div>
+    </GuestOnly>
   );
 }

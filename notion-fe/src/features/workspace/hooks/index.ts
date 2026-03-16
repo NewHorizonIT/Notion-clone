@@ -8,32 +8,35 @@ import {
 } from "../api";
 import useSWR, { mutate } from "swr";
 import { useCallback } from "react";
+import { Workspace } from "../types";
+
+export const WORKSPACES_KEY = "/workspaces";
+const EMPTY_WORKSPACES: Workspace[] = [];
 
 /**
  * Hook to create a new workspace
- * @returns Object with workspace, isLoading, isError, mutateWorkspace, and mutate function
+ * @returns Object with create action, loading and error state
  */
 export const useCreateWorkspace = () => {
-  const { trigger, data, error, isMutating } = useSWRMutation(
-    "/workspaces",
-    (_, { arg }: { arg: CreateWorkspaceData }) => createWorkspace(arg)
+  const { trigger, error, isMutating } = useSWRMutation(
+    WORKSPACES_KEY,
+    (_, { arg }: { arg: CreateWorkspaceData }) => createWorkspace(arg),
   );
 
-  const handleCreateWorkspace = useCallback(
+  const create = useCallback(
     async (workspaceData: CreateWorkspaceData) => {
       const result = await trigger(workspaceData);
       // Revalidate the workspaces list after creating a new workspace
-      mutate("/workspaces");
+      mutate(WORKSPACES_KEY);
       return result;
     },
-    [trigger]
+    [trigger],
   );
 
   return {
-    workspace: data?.data,
     isLoading: isMutating,
-    isError: error,
-    mutateWorkspace: handleCreateWorkspace,
+    isError: !!error,
+    create,
   };
 };
 
@@ -43,12 +46,16 @@ export const useCreateWorkspace = () => {
  */
 export const useGetListWorkspace = () => {
   const { data, error, isLoading, mutate } = useSWR(
-    "/workspaces",
-    getListWorkspace
+    WORKSPACES_KEY,
+    getListWorkspace,
+    {
+      revalidateOnFocus: false,
+      keepPreviousData: true,
+    },
   );
 
   return {
-    workspaces: data?.data || [],
+    workspaces: (data?.data as Workspace[] | undefined) ?? EMPTY_WORKSPACES,
     isLoading,
     isError: !!error,
     refetch: mutate,
@@ -65,11 +72,11 @@ export const useGetDetailWorkspace = (id: string) => {
   const { data, error, isLoading, mutate } = useSWR(
     id ? `/workspaces/${id}` : null,
     () => getDetailWorkspace(id),
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false },
   );
 
   return {
-    workspace: data?.data,
+    workspace: data?.data as Workspace | undefined,
     isLoading,
     isError: !!error,
     refetch: mutate,
@@ -80,30 +87,29 @@ export const useGetDetailWorkspace = (id: string) => {
 /**
  * Hook to update a workspace
  * @param id - Workspace ID to update
- * @returns Object with workspace, isLoading, isError, and mutateWorkspace function
+ * @returns Object with update action, loading and error state
  */
 export const useUpdateWorkspace = (id: string) => {
-  const { trigger, data, error, isMutating } = useSWRMutation(
+  const { trigger, error, isMutating } = useSWRMutation(
     `/workspaces/${id}`,
     (_, { arg }: { arg: Partial<CreateWorkspaceData> }) =>
-      updateWorkspace(id, arg)
+      updateWorkspace(id, arg),
   );
 
-  const handleUpdateWorkspace = useCallback(
+  const update = useCallback(
     async (workspaceData: Partial<CreateWorkspaceData>) => {
       const result = await trigger(workspaceData);
       // Revalidate both the specific workspace and the list
       mutate(`/workspaces/${id}`);
-      mutate("/workspaces");
+      mutate(WORKSPACES_KEY);
       return result;
     },
-    [trigger, id]
+    [trigger, id],
   );
 
   return {
-    workspace: data?.data,
     isLoading: isMutating,
-    isError: error,
-    mutateWorkspace: handleUpdateWorkspace,
+    isError: !!error,
+    update,
   };
 };

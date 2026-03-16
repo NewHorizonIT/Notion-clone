@@ -11,7 +11,7 @@ import { Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useLogin } from "../hooks";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useModalStore } from "@/shared/store/useModalStore";
 import useAuthStore from "@/shared/store/useAuthStore";
 
@@ -19,8 +19,9 @@ type LoginInput = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const { openModal } = useModalStore();
-  const { setToken } = useAuthStore();
+  const { setAuth } = useAuthStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -29,17 +30,18 @@ export default function LoginForm() {
     },
   });
 
-  const { user, isLoading, isError, mutateUser } = useLogin();
+  const { isLoading, login } = useLogin();
 
   const onSubmit = async (data: LoginData) => {
-    await mutateUser(data);
-    if (isError) {
+    try {
+      const response = await login(data);
+      setAuth(response.data.token.accessToken, response.data.user);
+      toast.success("Login success");
+      const redirectPath = searchParams.get("redirect") || "/";
+      router.replace(redirectPath);
+    } catch {
       toast.error("Login failed");
     }
-    toast.success("Login Success");
-    console.log(user);
-    setToken(user.data.token.accessToken);
-    router.push("/");
   };
 
   return (
@@ -62,20 +64,21 @@ export default function LoginForm() {
           icon={<Lock />}
         />
         <div className="flex justify-end">
-          <p
+          <button
+            type="button"
             className="text-primary text-base cursor-pointer"
             onClick={() => openModal("forget-password")}
           >
-            Forget passowrd?
-          </p>
+            Forgot password?
+          </button>
         </div>
         <Button type="submit" className="w-full cursor-pointer">
-          {isLoading ? "...Loading" : "Login"}
+          {isLoading ? "Loading..." : "Login"}
         </Button>
         <div className="text-white">
           You haven&apos;t registered?{" "}
           <Link href={"/sign-up"} className="text-primary">
-            Create Accont
+            Create Account
           </Link>
         </div>
       </form>

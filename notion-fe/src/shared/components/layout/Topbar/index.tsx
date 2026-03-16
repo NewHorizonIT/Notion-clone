@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Search, User, Settings, LogOut, ChevronRight } from "lucide-react";
+import { Search, User, LogOut, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 import { Input } from "../../ui/input";
@@ -18,6 +19,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { scaleIn } from "../../common/MotionWrapper";
 import { ModeToggle } from "../../common/ModeToggle";
+import useAuthStore from "@/shared/store/useAuthStore";
+import { useLogout } from "@/features/auth";
 
 const breadcrumbs = [
   { label: "Getting Started", href: "#" },
@@ -25,8 +28,25 @@ const breadcrumbs = [
 ];
 
 export function Topbar() {
+  const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const { logout, isLoading: isLoggingOut } = useLogout();
+
+  const userDisplayName = user?.username || "User";
+  const userEmail = user?.email || "";
+  const avatarFallback = userDisplayName.slice(0, 2).toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out");
+      router.replace("/login");
+    } catch {
+      toast.error("Logout failed");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b border-border backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -71,7 +91,7 @@ export function Topbar() {
               <Button variant="ghost" className="h-9 w-9 rounded-full p-0">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>{avatarFallback}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -91,10 +111,12 @@ export function Topbar() {
                   >
                     <DropdownMenuLabel>
                       <div className="flex flex-col gap-1">
-                        <p className="text-sm font-medium">John Doe</p>
-                        <p className="text-xs text-muted-foreground">
-                          john@example.com
-                        </p>
+                        <p className="text-sm font-medium">{userDisplayName}</p>
+                        {userEmail ? (
+                          <p className="text-xs text-muted-foreground">
+                            {userEmail}
+                          </p>
+                        ) : null}
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -107,11 +129,12 @@ export function Topbar() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => toast.success("Logged out")}
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
                       className="cursor-pointer text-destructive focus:text-destructive"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
                     </DropdownMenuItem>
                   </motion.div>
                 </DropdownMenuContent>

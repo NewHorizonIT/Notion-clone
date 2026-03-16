@@ -2,27 +2,8 @@
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowRight, BookOpen, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
-import FeatureCard from "./FeatureCard";
-
-const features = [
-  {
-    icon: Users,
-    title: "Cộng tác nhóm",
-    description: "Làm việc cùng nhau theo thời gian thực",
-  },
-  {
-    icon: BookOpen,
-    title: "Tài liệu Wiki",
-    description: "Tạo và quản lý tài liệu, ghi chú một cách dễ dàng",
-  },
-  {
-    icon: Sparkles,
-    title: "Tùy chỉnh linh hoạt",
-    description: "Thiết kế workspace theo phong cách riêng của bạn",
-  },
-];
 
 export default function HeroSection() {
   return (
@@ -70,18 +51,6 @@ export default function HeroSection() {
             <Button size="lg" variant="outline" className="text-base" asChild>
               <Link href="#features">Tìm hiểu thêm</Link>
             </Button>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full pt-12 animate-fade-in-up delay-500">
-            {features.map((feature, index) => (
-              <FeatureCard
-                key={index}
-                title={feature.title}
-                description={feature.description}
-                icon={feature.icon}
-              />
-            ))}
           </div>
         </div>
       </div>

@@ -25,9 +25,9 @@ export type resetPasswordData = z.infer<typeof resetPasswordSchema>;
 
 const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") as string;
+  const token = searchParams.get("token") || "";
   const router = useRouter();
-  const { mutateResetPassword, isError } = useResetPassword();
+  const { reset, isLoading } = useResetPassword();
   const form = useForm<resetPasswordData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -37,12 +37,18 @@ const ResetPasswordForm = () => {
   });
 
   const onSubmit = async (data: resetPasswordData) => {
-    await mutateResetPassword({ token, password: data.newPassword });
-    if (isError) {
-      toast.error("Reset password fail");
+    if (!token) {
+      toast.error("Invalid reset token");
+      return;
     }
-    toast.success("Reset password Success");
-    router.push("/login");
+
+    try {
+      await reset({ token, password: data.newPassword });
+      toast.success("Reset password success");
+      router.replace("/login");
+    } catch {
+      toast.error("Reset password failed");
+    }
   };
 
   return (
@@ -69,8 +75,9 @@ const ResetPasswordForm = () => {
           type="submit"
           className="w-full cursor-pointer"
           variant={"default"}
+          disabled={isLoading}
         >
-          Reset
+          {isLoading ? "Loading..." : "Reset"}
         </Button>
       </form>
     </Form>

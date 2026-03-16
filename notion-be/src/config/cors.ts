@@ -1,7 +1,7 @@
 import { CorsOptions } from "cors";
 
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:3000",
+  process.env.CLIENT_URL || "http://localhost:3000", // 127.0.0.1:3000
   // có thể thêm nhiều domain khác vào
 ];
 
