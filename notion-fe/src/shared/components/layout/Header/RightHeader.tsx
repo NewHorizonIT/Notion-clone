@@ -19,10 +19,10 @@ const RightHeader = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Logged out");
+      toast.success("Đăng xuất thành công");
       router.replace("/login");
     } catch {
-      toast.error("Logout failed");
+      toast.error("Đăng xuất thất bại");
     }
   };
 
@@ -37,7 +37,7 @@ const RightHeader = () => {
       {isLogin ? (
         <div className="flex items-center gap-2">
           <Button variant="secondary" className="hover:bg-primary" asChild>
-            <Link href="/pages">Go to app</Link>
+            <Link href="/pages">Vào ứng dụng</Link>
           </Button>
           <Button
             variant="outline"
@@ -45,16 +45,16 @@ const RightHeader = () => {
             onClick={handleLogout}
             disabled={isLoading}
           >
-            {isLoading ? "Loading..." : "Logout"}
+            {isLoading ? "Đang xử lý..." : "Đăng xuất"}
           </Button>
         </div>
       ) : (
         <div className="flex gap-2">
           <Button variant={"secondary"} className="hover:bg-primary" asChild>
-            <Link href="/login">Login</Link>
+            <Link href="/login">Đăng nhập</Link>
           </Button>
           <Button variant={"secondary"} className="hover:bg-primary" asChild>
-            <Link href="/sign-up">Sign Up</Link>
+            <Link href="/sign-up">Đăng ký</Link>
           </Button>
         </div>
       )}

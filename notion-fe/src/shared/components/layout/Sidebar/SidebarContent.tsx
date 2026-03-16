@@ -80,7 +80,7 @@ export default function SidebarContent({
     }
 
     if (hasWorkspaceError) {
-      toast.error("Failed to load workspaces");
+      toast.error("Không thể tải danh sách workspace");
     }
   }, [hasHydrated, isLoadingWorkspaces, hasWorkspaceError]);
 
@@ -94,18 +94,18 @@ export default function SidebarContent({
 
   const handleCreatePage = async () => {
     if (!currentWorkspace) {
-      toast.error("Please select a workspace first");
+      toast.error("Vui lòng chọn workspace trước");
       return;
     }
     try {
       const result = await create({ workspaceId: currentWorkspace.id });
       refreshPages();
-      toast.success("Page created");
+      toast.success("Tạo trang thành công");
       if (result.data?.id) {
         router.push(`/pages/${result.data.id}`);
       }
     } catch {
-      toast.error("Failed to create page");
+      toast.error("Tạo trang thất bại");
     }
   };
 
@@ -124,7 +124,7 @@ export default function SidebarContent({
 
   const handleOpenEditWorkspace = () => {
     if (!currentWorkspace) {
-      toast.error("Please select a workspace first");
+      toast.error("Vui lòng chọn workspace trước");
       return;
     }
 
@@ -160,12 +160,12 @@ export default function SidebarContent({
           >
             <SelectTrigger className="w-full">
               <span className="text-sm truncate">
-                {currentWorkspace?.name || "Select Workspace"}
+                {currentWorkspace?.name || "Chọn workspace"}
               </span>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Workspace</SelectLabel>
+                <SelectLabel>Danh sách workspace</SelectLabel>
                 {workspaceOptions.map((w) => (
                   <SelectItem
                     value={w.id}
@@ -185,7 +185,7 @@ export default function SidebarContent({
                   onClick={handleOpenCreateWorkspace}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Workspace
+                  Thêm workspace
                 </Button>
               </SelectGroup>
             </SelectContent>
@@ -205,7 +205,7 @@ export default function SidebarContent({
             ))
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No pages yet
+              Chưa có trang nào
             </p>
           )}
         </div>
@@ -224,7 +224,7 @@ export default function SidebarContent({
           ) : (
             <Plus className="h-4 w-4" />
           )}
-          <span className="text-sm">New Page</span>
+          <span className="text-sm">Trang mới</span>
         </Button>
         <Button
           variant="ghost"
@@ -233,7 +233,7 @@ export default function SidebarContent({
           disabled={!currentWorkspace}
         >
           <Settings className="h-4 w-4" />
-          <span className="text-sm">Workspace settings</span>
+          <span className="text-sm">Cài đặt workspace</span>
         </Button>
       </div>
     </div>

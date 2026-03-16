@@ -31,7 +31,7 @@ export default function PageDetailPage() {
   if (isError || !page) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-muted-foreground">Page not found</p>
+        <p className="text-muted-foreground">Không tìm thấy trang</p>
       </div>
     );
   }

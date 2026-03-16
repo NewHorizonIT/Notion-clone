@@ -33,17 +33,17 @@ export default function SignupForm() {
     try {
       const response = await register(data);
       setAuth(response.data.token.accessToken, response.data.user);
-      toast.success("Register success");
+      toast.success("Đăng ký thành công");
       router.replace("/");
     } catch {
-      toast.error("Register failed");
+      toast.error("Đăng ký thất bại");
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <h2 className="text-3xl text-white font-bold">Signup to NotionClone</h2>
+        <h2 className="text-3xl text-white font-bold">Đăng ký NotionClone</h2>
         <FormFieldCustom
           control={form.control}
           name="name"
@@ -72,12 +72,12 @@ export default function SignupForm() {
           variant={"default"}
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "Signup"}
+          {isLoading ? "Đang xử lý..." : "Đăng ký"}
         </Button>
         <div className="text-white">
-          You have registered?{" "}
+          Bạn đã có tài khoản?{" "}
           <Link href={"/login"} className="text-primary">
-            Login account
+            Đăng nhập
           </Link>
         </div>
       </form>

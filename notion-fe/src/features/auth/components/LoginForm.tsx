@@ -36,18 +36,18 @@ export default function LoginForm() {
     try {
       const response = await login(data);
       setAuth(response.data.token.accessToken, response.data.user);
-      toast.success("Login success");
+      toast.success("Đăng nhập thành công");
       const redirectPath = searchParams.get("redirect") || "/";
       router.replace(redirectPath);
     } catch {
-      toast.error("Login failed");
+      toast.error("Đăng nhập thất bại");
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <h2 className="text-2xl text-white font-bold">Login to NotionClone</h2>
+        <h2 className="text-2xl text-white font-bold">Đăng nhập vào NotionClone</h2>
         <FormFieldCustom
           control={form.control}
           name="email"
@@ -69,16 +69,16 @@ export default function LoginForm() {
             className="text-primary text-base cursor-pointer"
             onClick={() => openModal("forget-password")}
           >
-            Forgot password?
+            Quên mật khẩu?
           </button>
         </div>
         <Button type="submit" className="w-full cursor-pointer">
-          {isLoading ? "Loading..." : "Login"}
+          {isLoading ? "Đang xử lý..." : "Đăng nhập"}
         </Button>
         <div className="text-white">
-          You haven&apos;t registered?{" "}
+          Bạn chưa có tài khoản?{" "}
           <Link href={"/sign-up"} className="text-primary">
-            Create Account
+            Tạo tài khoản
           </Link>
         </div>
       </form>

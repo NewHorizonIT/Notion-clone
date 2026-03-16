@@ -23,8 +23,8 @@ import useAuthStore from "@/shared/store/useAuthStore";
 import { useLogout } from "@/features/auth";
 
 const breadcrumbs = [
-  { label: "Getting Started", href: "#" },
-  { label: "Welcome", href: "#" },
+  { label: "Bắt đầu", href: "#" },
+  { label: "Chào mừng", href: "#" },
 ];
 
 export function Topbar() {
@@ -34,17 +34,17 @@ export function Topbar() {
   const user = useAuthStore((state) => state.user);
   const { logout, isLoading: isLoggingOut } = useLogout();
 
-  const userDisplayName = user?.username || "User";
+  const userDisplayName = user?.username || "Người dùng";
   const userEmail = user?.email || "";
   const avatarFallback = userDisplayName.slice(0, 2).toUpperCase();
 
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Logged out");
+      toast.success("Đăng xuất thành công");
       router.replace("/login");
     } catch {
-      toast.error("Logout failed");
+      toast.error("Đăng xuất thất bại");
     }
   };
 
@@ -58,7 +58,7 @@ export function Topbar() {
               {index > 0 && <ChevronRight className="h-3 w-3" />}
               <button
                 className="hover:text-foreground transition-colors"
-                onClick={() => toast.info(`Navigate to ${crumb.label}`)}
+                onClick={() => toast.info(`Đi tới ${crumb.label}`)}
               >
                 {crumb.label}
               </button>
@@ -72,7 +72,7 @@ export function Topbar() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search pages..."
+              placeholder="Tìm kiếm trang..."
               className="pl-9 bg-muted/50 border-0 focus-visible:ring-1"
               onFocus={() => setSearchOpen(true)}
               onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
@@ -121,11 +121,11 @@ export function Topbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => toast.info("Profile coming soon")}
+                      onClick={() => toast.info("Tính năng hồ sơ sẽ sớm ra mắt")}
                       className="cursor-pointer"
                     >
                       <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>Hồ sơ</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -134,7 +134,7 @@ export function Topbar() {
                       className="cursor-pointer text-destructive focus:text-destructive"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
+                      <span>{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>
                     </DropdownMenuItem>
                   </motion.div>
                 </DropdownMenuContent>

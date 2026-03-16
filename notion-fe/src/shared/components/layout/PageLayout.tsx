@@ -73,7 +73,7 @@ export function PageLayout({ page }: PageLayoutProps) {
       {imageUrl && (
         <Image
           src={imageUrl}
-          alt="Page Background"
+          alt="Ảnh nền trang"
           className="w-full object-cover"
           width={600}
           height={300}
@@ -88,7 +88,7 @@ export function PageLayout({ page }: PageLayoutProps) {
               onClick={handleRandomImage}
             >
               <ImageIcon />
-              <p>Add cover </p>
+              <p>Thêm ảnh bìa</p>
             </Button>
           </div>
           <Input
@@ -98,7 +98,7 @@ export function PageLayout({ page }: PageLayoutProps) {
             onChange={handleTitleChange}
             value={titleValue}
             type="text"
-            placeholder="New Page"
+            placeholder="Trang mới"
           />
           <div className="py-5">
             <Editor pageId={page.id} />

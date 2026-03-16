@@ -30,9 +30,9 @@ export default function PageItem({ page, onDeleted }: PageItemProps) {
     try {
       await remove(page.id, page.workspaceId);
       onDeleted?.();
-      toast.success("Page moved to trash");
+      toast.success("Đã chuyển trang vào thùng rác");
     } catch {
-      toast.error("Failed to move page to trash");
+      toast.error("Không thể chuyển trang vào thùng rác");
     }
   };
 
@@ -55,7 +55,7 @@ export default function PageItem({ page, onDeleted }: PageItemProps) {
           )}
         </div>
         <Link href={`/pages/${page.id}`} className="flex-1 truncate text-sm">
-          {page.title || "Untitled"}
+          {page.title || "Chưa đặt tiêu đề"}
         </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -74,7 +74,7 @@ export default function PageItem({ page, onDeleted }: PageItemProps) {
               disabled={isDeleting}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Move to Trash
+              Chuyển vào thùng rác
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

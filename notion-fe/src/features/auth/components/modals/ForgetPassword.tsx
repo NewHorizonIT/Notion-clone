@@ -20,11 +20,11 @@ export function ForgetPasswordModal({
     try {
       setIsSubmitting(true);
       await forgetPassword(email);
-      toast.success("Reset password email sent");
+      toast.success("Đã gửi email đặt lại mật khẩu");
       onOpenChange(false);
       setEmail("");
     } catch {
-      toast.error("Failed to send reset email");
+      toast.error("Gửi email đặt lại mật khẩu thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -44,7 +44,7 @@ export function ForgetPasswordModal({
           onChange={(e) => setEmail(e.target.value)}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Đang gửi..." : "Gửi link reset password"}
+          {isSubmitting ? "Đang gửi..." : "Gửi liên kết đặt lại mật khẩu"}
         </Button>
       </form>
     </BaseModal>

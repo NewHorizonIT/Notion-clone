@@ -17,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Notion Clone",
-  description: "A Notion-like app built with Next.js, Prisma, and Tailwind CSS",
+  description:
+    "Ứng dụng quản lý ghi chú kiểu Notion được xây dựng bằng Next.js, Prisma và Tailwind CSS",
 };
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -16,9 +16,9 @@ import {
 } from "../../ui/sheet";
 
 const MenuItems = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Features", href: "/features" },
+  { label: "Trang chủ", href: "/" },
+  { label: "Giới thiệu", href: "/about" },
+  { label: "Tính năng", href: "/features" },
 ];
 
 const MenuHeader = () => {
@@ -44,7 +44,7 @@ const MenuHeader = () => {
                   href={item.href}
                   className={cn(
                     "hover:text-primary font-medium text-2xl min-w-20 px-5",
-                    path === item.href && "text-primary"
+                    path === item.href && "text-primary",
                   )}
                 >
                   {item.label}
@@ -54,14 +54,14 @@ const MenuHeader = () => {
           </SheetContent>
         </Sheet>
       ) : (
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 gap-10">
           {MenuItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
                 "hover:text-primary font-medium text-lg min-w-20",
-                path === item.href && "text-primary"
+                path === item.href && "text-primary",
               )}
             >
               {item.label}

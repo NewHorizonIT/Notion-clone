@@ -1,12 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import MenuHeader from "./MenuHeader";
 import RightHeader from "./RightHeader";
 
 const Header = () => {
-  const path = usePathname();
   return (
     <div className="flex items-center justify-between p-4 fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border z-50">
       {/* Logo */}

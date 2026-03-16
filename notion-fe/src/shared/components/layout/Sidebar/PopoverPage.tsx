@@ -16,14 +16,14 @@ const PopoverPage = () => {
       <PopoverContent className="w-80">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="leading-none font-medium">Dimensions</h4>
+            <h4 className="leading-none font-medium">Kích thước</h4>
             <p className="text-muted-foreground text-sm">
-              Set the dimensions for the layer.
+              Thiết lập kích thước cho lớp nội dung.
             </p>
           </div>
           <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="width">Width</Label>
+              <Label htmlFor="width">Chiều rộng</Label>
               <Input
                 id="width"
                 defaultValue="100%"
@@ -31,7 +31,7 @@ const PopoverPage = () => {
               />
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Max. width</Label>
+              <Label htmlFor="maxWidth">Rộng tối đa</Label>
               <Input
                 id="maxWidth"
                 defaultValue="300px"
@@ -39,7 +39,7 @@ const PopoverPage = () => {
               />
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Height</Label>
+              <Label htmlFor="height">Chiều cao</Label>
               <Input
                 id="height"
                 defaultValue="25px"
@@ -47,7 +47,7 @@ const PopoverPage = () => {
               />
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxHeight">Max. height</Label>
+              <Label htmlFor="maxHeight">Cao tối đa</Label>
               <Input
                 id="maxHeight"
                 defaultValue="none"

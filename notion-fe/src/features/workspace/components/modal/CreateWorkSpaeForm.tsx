@@ -53,15 +53,15 @@ export default function CreateWorkSpaceForm({
       onSuccess?.(result.data as Workspace);
       toast.success(
         isEditMode
-          ? "Workspace updated successfully"
-          : "Workspace created successfully",
+          ? "Cập nhật workspace thành công"
+          : "Tạo workspace thành công",
       );
       form.reset({ name: "" });
       onOpenChange(false);
     } catch (error) {
       const fallbackMessage = isEditMode
-        ? "Failed to update workspace"
-        : "Failed to create workspace";
+        ? "Cập nhật workspace thất bại"
+        : "Tạo workspace thất bại";
 
       if (axios.isAxiosError(error)) {
         const messageFromServer =
@@ -88,7 +88,7 @@ export default function CreateWorkSpaceForm({
               control={form.control}
               name="name"
               label="Tên workspace"
-              placeholder="My workspace"
+              placeholder="Workspace của tôi"
               type="text"
               icon={<Mail />}
             />
@@ -103,7 +103,7 @@ export default function CreateWorkSpaceForm({
               Hủy
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Loading..." : isEditMode ? "Cập nhật" : "Tạo"}
+              {isLoading ? "Đang xử lý..." : isEditMode ? "Cập nhật" : "Tạo"}
             </Button>
           </div>
         </form>

@@ -176,7 +176,7 @@ export default function Editor({ pageId }: EditorProps) {
     return (
       <div className="w-full max-w-3/4 min-h-[50vh] flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">
-          Loading editor...
+          Đang tải trình soạn thảo...
         </div>
       </div>
     );

@@ -30,7 +30,7 @@ export default function HeroSection() {
             Viết. Lập kế hoạch. Chia sẻ.
             <br />
             <span className="bg-linear-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Với Notion Clone
+              Với NotionX
             </span>
           </h1>
 

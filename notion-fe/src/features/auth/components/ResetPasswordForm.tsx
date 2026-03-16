@@ -13,11 +13,11 @@ import { Form } from "@/shared/components/ui/form";
 
 const resetPasswordSchema = z
   .object({
-    newPassword: z.string().min(5, "password min 5 characters"),
+    newPassword: z.string().min(5, "Mật khẩu phải có ít nhất 5 ký tự"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Mật khẩu xác nhận không khớp",
     path: ["confirmPassword"],
   });
 
@@ -38,36 +38,36 @@ const ResetPasswordForm = () => {
 
   const onSubmit = async (data: resetPasswordData) => {
     if (!token) {
-      toast.error("Invalid reset token");
+      toast.error("Liên kết đặt lại mật khẩu không hợp lệ");
       return;
     }
 
     try {
       await reset({ token, password: data.newPassword });
-      toast.success("Reset password success");
+      toast.success("Đặt lại mật khẩu thành công");
       router.replace("/login");
     } catch {
-      toast.error("Reset password failed");
+      toast.error("Đặt lại mật khẩu thất bại");
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <h2 className="text-3xl text-white font-bold">Reset password</h2>
+        <h2 className="text-3xl text-white font-bold">Đặt lại mật khẩu</h2>
         <FormFieldCustom
           control={form.control}
           name="newPassword"
-          label="New Password"
+          label="Mật khẩu mới"
           type="password"
-          placeholder="new password"
+          placeholder="Nhập mật khẩu mới"
           icon={<Lock />}
         />
 
         <FormFieldCustom
           control={form.control}
           name="confirmPassword"
-          label="Confirm password"
+          label="Xác nhận mật khẩu"
           type="password"
           icon={<Lock />}
         />
@@ -77,7 +77,7 @@ const ResetPasswordForm = () => {
           variant={"default"}
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "Reset"}
+          {isLoading ? "Đang xử lý..." : "Xác nhận"}
         </Button>
       </form>
     </Form>
