@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, User, LogOut, ChevronRight } from "lucide-react";
+import { Search, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
@@ -21,11 +21,6 @@ import { scaleIn } from "../../common/MotionWrapper";
 import { ModeToggle } from "../../common/ModeToggle";
 import useAuthStore from "@/shared/store/useAuthStore";
 import { useLogout } from "@/features/auth";
-
-const breadcrumbs = [
-  { label: "Bắt đầu", href: "#" },
-  { label: "Chào mừng", href: "#" },
-];
 
 export function Topbar() {
   const router = useRouter();
@@ -50,22 +45,7 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
-        {/* Breadcrumb Navigation */}
-        <nav className="hidden md:flex items-center gap-1 text-sm text-muted-foreground flex-1">
-          {breadcrumbs.map((crumb, index) => (
-            <div key={index} className="flex items-center gap-1">
-              {index > 0 && <ChevronRight className="h-3 w-3" />}
-              <button
-                className="hover:text-foreground transition-colors"
-                onClick={() => toast.info(`Đi tới ${crumb.label}`)}
-              >
-                {crumb.label}
-              </button>
-            </div>
-          ))}
-        </nav>
-
+      <div className="flex h-14 items-center justify-between gap-4 px-4 lg:px-6">
         {/* Search Bar */}
         <div className="flex-1 md:flex-none md:w-96">
           <div className="relative">
@@ -121,7 +101,9 @@ export function Topbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => toast.info("Tính năng hồ sơ sẽ sớm ra mắt")}
+                      onClick={() =>
+                        toast.info("Tính năng hồ sơ sẽ sớm ra mắt")
+                      }
                       className="cursor-pointer"
                     >
                       <User className="mr-2 h-4 w-4" />
@@ -134,7 +116,9 @@ export function Topbar() {
                       className="cursor-pointer text-destructive focus:text-destructive"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>
+                      <span>
+                        {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+                      </span>
                     </DropdownMenuItem>
                   </motion.div>
                 </DropdownMenuContent>

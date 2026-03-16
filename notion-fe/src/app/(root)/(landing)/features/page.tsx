@@ -18,7 +18,7 @@ import {
 
 export default function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background m-auto px-4 md:px-6">
       <Separator className="my-12" />
 
       {/* Main Features Grid */}

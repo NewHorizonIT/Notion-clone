@@ -6,7 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <Header />
-      <main>{children}</main>
+      <main className="flex justify-center">{children}</main>
       <Footer />
     </div>
   );
