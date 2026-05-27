@@ -22,6 +22,16 @@ export function Sidebar() {
       </Button>
 
       {/* Desktop Sidebar */}
+      {isOpen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden lg:block absolute top-4 right-4 z-50 h-8 w-8"
+          onClick={() => setIsOpen(false)}
+        >
+          <Menu className="h-4 w-4" />
+        </Button>
+      )}
       <motion.aside
         initial={false}
         animate={{ width: isOpen ? 280 : 0 }}

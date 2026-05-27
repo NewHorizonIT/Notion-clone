@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import "./container";
 
+import http from "http";
 import express from "express";
 import { requestLogger } from "./middlewares/requestLogger";
 import router from "./router";
@@ -14,6 +15,7 @@ import logger from "./utils/logger";
 import rateLimiterMiddleware from "./middlewares/rateLimiter";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
+import { attachWebSocketServer } from "./websocket/wsServer";
 
 const app = express();
 app.use(cookieParser());
@@ -46,8 +48,12 @@ app.use("/api/v1", checkApiKey, router);
 
 app.use(errorHandler as ErrorRequestHandler);
 
-app.listen(4000, () => {
-  logger.info("Server is running", "https://localhost:4000");
+const httpServer = http.createServer(app);
+attachWebSocketServer(httpServer);
+
+httpServer.listen(4000, () => {
+  logger.info("Server is running on http://localhost:4000");
+  logger.info("WebSocket is available on ws://localhost:4000/<pageId>");
 });
 
 export default app;
