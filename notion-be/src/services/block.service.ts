@@ -43,25 +43,10 @@ class BlockService {
       }
     }
 
-    // Step 3: Check OrderIndex
-    const orderIsExists = await this.blockRepo.getBlockByFilter({
-      parentId: blockData.parentId,
-      pageId: blockData.pageId,
-      orderIndex: blockData.orderIndex,
-    });
-
-    if (orderIsExists) {
-      throw new ErrorResponse({
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: "Order index is invalid",
-        error: ReasonPhrases.BAD_REQUEST,
-      });
-    }
-
     const block = await this.blockRepo.createBlock(blockData);
     if (!block) {
       throw new ErrorResponse({
-        message: "Create Blog Failed",
+        message: "Create Block Failed",
         statusCode: StatusCodes.BAD_REQUEST,
         error: "Create Block error",
       });
@@ -88,7 +73,7 @@ class BlockService {
       query,
     );
 
-    if (!blocks || blocks.length === 0) {
+    if (!blocks) {
       throw new ErrorResponse({
         message: "Get blocks of page failed",
         error: ReasonPhrases.NOT_FOUND,
@@ -102,7 +87,7 @@ class BlockService {
     const childrenBlocks = await this.blockRepo.getBlocksByFilter({
       parentId: parentBlockID,
     });
-    if (!childrenBlocks || childrenBlocks) {
+    if (!childrenBlocks || childrenBlocks.length === 0) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
         message: "Get children blocks not found",

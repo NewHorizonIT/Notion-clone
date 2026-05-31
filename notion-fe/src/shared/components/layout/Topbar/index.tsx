@@ -50,13 +50,23 @@ export function Topbar() {
         <div className="flex-1 md:flex-none md:w-96">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Tìm kiếm trang..."
-              className="pl-9 bg-muted/50 border-0 focus-visible:ring-1"
-              onFocus={() => setSearchOpen(true)}
-              onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-            />
+            {searchOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full mt-2 w-full rounded-md bg-card shadow-lg p-4 z-10"
+              >
+                <Input
+                  type="search"
+                  placeholder="Tìm kiếm trang..."
+                  className="pl-9 bg-muted/50 border-0 focus-visible:ring-1"
+                  onFocus={() => setSearchOpen(true)}
+                  onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
+                />
+              </motion.div>
+            )}
           </div>
         </div>
 

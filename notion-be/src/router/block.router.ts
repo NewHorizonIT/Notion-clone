@@ -2,10 +2,12 @@ import { Router } from "express";
 import { container } from "tsyringe";
 import BlockController from "../controllers/block.controller";
 import { asyncHandler } from "../utils/asyncHandler";
+import { authenticate } from "../middlewares/authentication";
 
 const blockRouter = Router();
 const blockController = container.resolve(BlockController);
 
+blockRouter.use(authenticate);
 // POST - /blocks - create new block
 blockRouter.post("/", asyncHandler(blockController.createBlock));
 // GET - /blocks/pages/:id - Get block of page

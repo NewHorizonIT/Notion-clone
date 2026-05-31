@@ -12,8 +12,9 @@ export function authenticate(
     const authHeader = req.headers["authorization"];
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new ErrorResponse({
-        error: ErrorCodes.INVALID_TOKEN,
+        error: ErrorCodes.AUTHENTICATION_FAILED,
         message: ReasonPhrases.UNAUTHORIZED,
+        statusCode: StatusCodes.UNAUTHORIZED,
       });
     }
     const token = authHeader.split(" ")[1];

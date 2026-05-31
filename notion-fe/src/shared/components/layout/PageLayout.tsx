@@ -3,7 +3,7 @@
 import type { Page } from "@/features/page/types";
 import { useUpdatePage } from "@/features/page/hooks";
 import { cn } from "@/shared/lib/utils";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Users, UserX } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 import { Editor } from "./Editor/EditorWrapper";
+import CollaborativeEditor from "./Editor/CollaborativeEditor";
 
 interface PageLayoutProps {
   page: Page;
@@ -21,6 +22,7 @@ export function PageLayout({ page }: PageLayoutProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(
     page.coverUrl || null,
   );
+  const [isCollabMode, setIsCollabMode] = useState(false);
   const { update } = useUpdatePage(page.id);
   const isInitialMount = useRef(true);
   const lastPersistedTitle = useRef(page.title || "");
@@ -90,6 +92,14 @@ export function PageLayout({ page }: PageLayoutProps) {
               <ImageIcon />
               <p>Thêm ảnh bìa</p>
             </Button>
+            <Button
+              variant={isCollabMode ? "default" : "ghost"}
+              className="mb-4 flex items-center gap-2 cursor-pointer"
+              onClick={() => setIsCollabMode((v) => !v)}
+            >
+              {isCollabMode ? <UserX className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+              <p>{isCollabMode ? "Thoát cộng tác" : "Cộng tác"}</p>
+            </Button>
           </div>
           <Input
             className={cn(
@@ -101,7 +111,11 @@ export function PageLayout({ page }: PageLayoutProps) {
             placeholder="Trang mới"
           />
           <div className="py-5">
-            <Editor pageId={page.id} />
+            {isCollabMode ? (
+              <CollaborativeEditor pageId={page.id} />
+            ) : (
+              <Editor pageId={page.id} />
+            )}
           </div>
         </div>
       </ScrollArea>

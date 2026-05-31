@@ -13,7 +13,6 @@ const RightHeader = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
   const isLogin = useAuthStore((state) => state.isLogin);
-  const user = useAuthStore((state) => state.user);
   const { logout, isLoading } = useLogout();
 
   const handleLogout = async () => {

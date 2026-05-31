@@ -1,7 +1,7 @@
 export type FeatureCardProps = {
   title: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 const FeatureCard = ({ title, description, icon: Icon }: FeatureCardProps) => {
