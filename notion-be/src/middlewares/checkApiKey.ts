@@ -9,8 +9,7 @@ export default function checkApiKey(
   res: Response,
   next: NextFunction,
 ): void {
-  const apiKey =
-    req.headers["x-api-key"] || req.query.apiKey || req.body.apiKey;
+  const apiKey = req.headers["x-api-key"];
   if (!apiKey || apiKey !== config.api.key) {
     throw new ErrorResponse({
       message: "APIKEY INVALID",
