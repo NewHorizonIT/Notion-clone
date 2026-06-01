@@ -6,12 +6,14 @@ import { ErrorResponse } from "../response/response";
 import { ReasonPhrases, StatusCodes } from "../response";
 import PageRepo from "../repositories/page.repo";
 import { Queries } from "../response/query";
+import { Prisma, PrismaClient } from "../generated/prisma";
 
 @injectable()
 class BlockService {
   constructor(
     private readonly blockRepo: BlockRepo,
     private readonly pageRepo: PageRepo,
+    private prisma: PrismaClient,
   ) {}
   async createNewBlock(blockData: CreateBlockData): Promise<Block> {
     // Step 1:  Check pageId is exists
@@ -25,7 +27,10 @@ class BlockService {
     }
     // Step 2: Check block parrent is exists
     if (blockData.parentId) {
-      const blockParent = await this.blockRepo.getBlockByID(blockData.parentId);
+      const blockParent = await this.blockRepo.getBlockByID(
+        this.prisma,
+        blockData.parentId,
+      );
       if (!blockParent) {
         throw new ErrorResponse({
           statusCode: StatusCodes.BAD_REQUEST,
@@ -43,7 +48,7 @@ class BlockService {
       }
     }
 
-    const block = await this.blockRepo.createBlock(blockData);
+    const block = await this.blockRepo.createBlock(this.prisma, blockData);
     if (!block) {
       throw new ErrorResponse({
         message: "Create Block Failed",
@@ -55,7 +60,7 @@ class BlockService {
   }
 
   async getBlockByID(blockID: string): Promise<Block> {
-    const block = await this.blockRepo.getBlockByID(blockID);
+    const block = await this.blockRepo.getBlockByID(this.prisma, blockID);
     if (!block) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
@@ -101,7 +106,7 @@ class BlockService {
     blockID: string,
     blockData: Partial<UpdateBlockData>,
   ): Promise<Block> {
-    const blockHolder = await this.blockRepo.getBlockByID(blockID);
+    const blockHolder = await this.blockRepo.getBlockByID(this.prisma, blockID);
     if (!blockHolder) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
@@ -111,6 +116,7 @@ class BlockService {
     }
 
     const updatedBlock = await this.blockRepo.updateBlockByID(
+      this.prisma,
       blockID,
       blockData,
     );
@@ -126,7 +132,7 @@ class BlockService {
   }
 
   async deleteBlock(blockID: string): Promise<Block> {
-    const blockHolder = await this.blockRepo.getBlockByID(blockID);
+    const blockHolder = await this.blockRepo.getBlockByID(this.prisma, blockID);
     if (!blockHolder) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
@@ -145,6 +151,40 @@ class BlockService {
     }
 
     return deletedBlock;
+  }
+
+  // Create blocks in batch
+  async createBlocksBatch(blocksData: CreateBlockData[]): Promise<Block[]> {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      return Promise.all(
+        blocksData.map((blockData) =>
+          this.blockRepo.createBlock(tx, blockData),
+        ),
+      );
+    });
+  }
+
+  // Update blocks in batch
+  async updateBlocksBatch(
+    blocksData: { id: string; data: Partial<UpdateBlockData> }[],
+  ): Promise<Block[]> {
+    return this.prisma.$transaction(async (tx) => {
+      return Promise.all(
+        blocksData.map(async ({ id, data }) => {
+          const block = await this.blockRepo.getBlockByID(tx, id);
+
+          if (!block) {
+            throw new ErrorResponse({
+              statusCode: StatusCodes.NOT_FOUND,
+              message: `Block ${id} not found`,
+              error: ReasonPhrases.NOT_FOUND,
+            });
+          }
+
+          return this.blockRepo.updateBlockByID(tx, id, data);
+        }),
+      );
+    });
   }
 }
 

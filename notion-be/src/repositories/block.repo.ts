@@ -2,11 +2,13 @@ import { injectable } from "tsyringe";
 import { Block, Prisma, PrismaClient } from "../generated/prisma";
 import { CreateBlockData, UpdateBlockData } from "../schemas/blog.schema";
 import { Queries } from "../response/query";
+
+type db = PrismaClient | Prisma.TransactionClient;
 @injectable()
 class BlockRepo {
   constructor(private readonly prisma: PrismaClient) {}
-  async createBlock(blockData: CreateBlockData): Promise<Block> {
-    return await this.prisma.block.create({
+  async createBlock(db: db, blockData: CreateBlockData): Promise<Block> {
+    return await db.block.create({
       data: {
         ...blockData,
         content:
@@ -14,8 +16,8 @@ class BlockRepo {
       },
     });
   }
-  async getBlockByID(id: string): Promise<Block | null> {
-    return await this.prisma.block.findUnique({
+  async getBlockByID(db: db, id: string): Promise<Block | null> {
+    return await db.block.findUnique({
       where: { id, isDeleted: false },
     });
   }
@@ -48,8 +50,8 @@ class BlockRepo {
     });
   }
 
-  async updateBlockByID(blockID: string, blockData: UpdateBlockData) {
-    return await this.prisma.block.update({
+  async updateBlockByID(db: db, blockID: string, blockData: UpdateBlockData) {
+    return await db.block.update({
       where: { id: blockID, isDeleted: false },
       data: {
         ...blockData,
