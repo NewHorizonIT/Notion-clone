@@ -85,6 +85,33 @@ class BlockController {
       message: "Delete block success",
     }).send(res);
   };
+
+  // Create blocks batch
+  createBlocksBatch = async (req: Request, res: Response): Promise<void> => {
+    const blocksData = req.body as CreateBlockData[];
+    const blocks = await this.blockService.createBlocksBatch(blocksData);
+
+    new SuccessResponse({
+      statusCode: StatusCodes.OK,
+      message: "Create blocks batch success",
+      data: blocks,
+    }).send(res);
+  };
+
+  // Update blocks batch
+  updateBlocksBatch = async (req: Request, res: Response): Promise<void> => {
+    const blocksData = req.body as {
+      id: string;
+      data: Partial<UpdateBlockData>;
+    }[];
+    const blocks = await this.blockService.updateBlocksBatch(blocksData);
+
+    new SuccessResponse({
+      statusCode: StatusCodes.OK,
+      message: "Update blocks batch success",
+      data: blocks,
+    }).send(res);
+  };
 }
 
 export default BlockController;

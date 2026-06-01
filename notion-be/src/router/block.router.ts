@@ -24,4 +24,8 @@ blockRouter.delete("/:id", asyncHandler(blockController.deleteBlock));
 // PATCH - /blocks/:id/move - Move block
 // PATCH - /blocks/:id/restore - Restore block
 
+// POST - /blocks/batch - Create blocks in batch
+blockRouter.post("/batch", asyncHandler(blockController.createBlocksBatch));
+// PATCH - /blocks/batch - Update blocks in batch
+blockRouter.patch("/batch", asyncHandler(blockController.updateBlocksBatch));
 export default blockRouter;
