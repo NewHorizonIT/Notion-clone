@@ -4,9 +4,11 @@ import { CreateWorkSpaceSchema } from "../schemas/workspace.schema";
 import { container } from "tsyringe";
 import WorkSpaceController from "../controllers/workspace.controller";
 import { authenticate } from "../middlewares/authentication";
+import { HasAccessWorkspace } from "../middlewares/hasAccessWorkspace";
 const workspaceRouter = express.Router();
 
 const workspaceController = container.resolve(WorkSpaceController);
+const hasAccessWorkspace = container.resolve(HasAccessWorkspace);
 
 workspaceRouter.use(authenticate);
 
@@ -21,15 +23,19 @@ workspaceRouter.post(
 workspaceRouter.get("/", workspaceController.getWorkspacesOfUser);
 
 // GET workspaces/:id → Get detail workspace
-workspaceRouter.get("/:id", workspaceController.getWorkspaceById);
+workspaceRouter.get(
+  "/:workspaceId",
+  hasAccessWorkspace.execute,
+  workspaceController.getWorkspaceById,
+);
 
-//PUT /api/workspaces/:id → update workspace
-workspaceRouter.put("/:id", workspaceController.updateWorkspace);
+//PUT /api/workspaces/:workspaceId → update workspace
+workspaceRouter.put("/:workspaceId", workspaceController.updateWorkspace);
 
-// DELETE /api/workspaces/:id → delete workspace
-// workspaceRouter.delete("/:id");
+// DELETE /api/workspaces/:workspaceId → delete workspace
+// workspaceRouter.delete("/:workspaceId");
 
-// POST /api/workspaces/:id/invite → invite member to workspace
-// workspaceRouter.post("/:id/invite");
+// POST /api/workspaces/:workspaceId/invite → invite member to workspace
+// workspaceRouter.post("/:workspaceId/invite");
 
 export default workspaceRouter;
