@@ -3,10 +3,14 @@ import WorkSpaceRepo from "../repositories/workspace.repo";
 import { WorkSpaceResponse } from "../schemas/workspace.schema";
 import { ErrorResponse } from "../response/response";
 import { StatusCodes } from "../response";
+import WorkspaceMemberRepo from "../repositories/workspaceMember.repo";
 
 @injectable()
 class WorkspaceService {
-  constructor(private workspaceRepo: WorkSpaceRepo) {}
+  constructor(
+    private workspaceRepo: WorkSpaceRepo,
+    private workspaceMemberRepo: WorkspaceMemberRepo,
+  ) {}
 
   // Create workspace
   public async createWorkspace(
@@ -100,6 +104,40 @@ class WorkspaceService {
       newName,
     );
     return updatedWorkspace as WorkSpaceResponse;
+  }
+
+  // Ensure user has access to workspace
+  public async ensureUserHasAccessToWorkspace(
+    workspaceId: string,
+    userId: string,
+  ): Promise<boolean> {
+    // Step 1: Check wokspace exists
+    console.log(
+      "🚀 ~ file: workspace.service.ts:143 ~ WorkspaceService ~ ensureUserHasAccessToWorkspace ~ workspaceId:",
+      workspaceId,
+    );
+    const workspace = await this.workspaceRepo.getWorkspaceById(
+      workspaceId,
+      userId,
+    );
+
+    if (workspace) {
+      return true;
+    }
+
+    // Step 3: Check user is member of workspace
+    const hasAccess = await this.workspaceMemberRepo.isUserMemberOfWorkspace(
+      workspaceId,
+      userId,
+    );
+    if (!hasAccess) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.FORBIDDEN,
+        message: "Access denied",
+        error: "FORBIDDEN",
+      });
+    }
+    return true;
   }
 }
 

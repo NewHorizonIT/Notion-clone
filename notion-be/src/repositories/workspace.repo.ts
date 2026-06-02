@@ -20,7 +20,7 @@ class WorkSpaceRepo {
 
   // Get workspace by id
   public async getWorkspaceById(id: string, userId: string) {
-    const workspace = await this.prisma.workSpace.findUnique({
+    const workspace = await this.prisma.workSpace.findFirst({
       where: { id, ownerId: userId },
       include: {
         pages: {

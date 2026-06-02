@@ -117,6 +117,18 @@ class WorkspaceMemberService {
       await this.workspaceMemberRepo.getListMemberOfWorkspace(workspaceId);
     return members;
   }
+
+  // Check if user is member of workspace
+  public async isUserMemberOfWorkspace(
+    workspaceId: string,
+    userId: string,
+  ): Promise<boolean> {
+    const isMember = await this.workspaceMemberRepo.isUserMemberOfWorkspace(
+      workspaceId,
+      userId,
+    );
+    return isMember;
+  }
 }
 
 export default WorkspaceMemberService;
