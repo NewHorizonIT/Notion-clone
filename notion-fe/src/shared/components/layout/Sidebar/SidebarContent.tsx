@@ -5,7 +5,7 @@ import { useGetListWorkspace } from "@/features/workspace/hooks";
 import { useModalStore } from "@/shared/store/useModalStore";
 import useWorkspaceStore from "@/shared/store/useWorkspaceStore";
 import { SelectArrow } from "@radix-ui/react-select";
-import { Loader2, Plus, Settings, X } from "lucide-react";
+import { Loader2, Plus, Settings, Trash, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
@@ -234,6 +234,23 @@ export default function SidebarContent({
         >
           <Settings className="h-4 w-4" />
           <span className="text-sm">Cài đặt workspace</span>
+        </Button>
+
+        {/* Button redirect trash page */}
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2 hover:bg-sidebar-accent"
+          onClick={() => {
+            if (!currentWorkspace) {
+              toast.error("Vui lòng chọn workspace trước");
+              return;
+            }
+            router.push(`/pages/trash`);
+          }}
+          disabled={!currentWorkspace}
+        >
+          <Trash />
+          <span className="text-sm">Thùng rác</span>
         </Button>
       </div>
     </div>
