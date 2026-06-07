@@ -41,3 +41,13 @@ export const updateWorkspace = (
   api
     .put<ApiResponse<Workspace>>(`/workspaces/${id}`, workspaceData)
     .then((res) => res.data);
+
+/**
+ * Delete a workspace
+ * @param id - Workspace ID
+ * @returns Deleted workspace data
+ */
+export const deleteWorkspace = (id: string) =>
+  api
+    .delete<ApiResponse<Workspace>>(`/workspaces/${id}`)
+    .then((res) => res.data);

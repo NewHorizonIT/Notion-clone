@@ -13,6 +13,7 @@ export interface WorkSpaceResponse {
   slug: string;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface WorkSpaceListResponse {

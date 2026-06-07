@@ -32,8 +32,11 @@ workspaceRouter.get(
 //PUT /api/workspaces/:workspaceId → update workspace
 workspaceRouter.put("/:workspaceId", workspaceController.updateWorkspace);
 
-// DELETE /api/workspaces/:workspaceId → delete workspace
-// workspaceRouter.delete("/:workspaceId");
+// DELETE /api/v1/workspaces/:workspaceId → delete workspace
+workspaceRouter.delete(
+  "/:workspaceId",
+  workspaceController.deleteSoftWorkspace,
+);
 
 // POST /api/workspaces/:workspaceId/invite → invite member to workspace
 // workspaceRouter.post("/:workspaceId/invite");

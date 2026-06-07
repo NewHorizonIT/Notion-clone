@@ -41,6 +41,7 @@ export default function SidebarContent({
     workspaces: data,
     isLoading: isLoadingWorkspaces,
     isError: hasWorkspaceError,
+    refetch: refetchWorkspaces,
   } = useGetListWorkspace();
 
   const workspaceOptions = useMemo(() => workspaces, [workspaces]);
@@ -132,6 +133,25 @@ export default function SidebarContent({
       workspaceId: currentWorkspace.id,
       initialName: currentWorkspace.name,
       onSuccess: handleWorkspaceUpdated,
+    });
+  };
+
+  const handleOpenDeleteWorkspace = () => {
+    if (!currentWorkspace) {
+      toast.error("Vui lòng chọn workspace trước");
+      return;
+    }
+
+    openModal("delete-workspace", {
+      workspaceId: currentWorkspace.id,
+      workspaceName: currentWorkspace.name,
+      onSuccess: async () => {
+        try {
+          await refetchWorkspaces();
+        } finally {
+          setCurrentWorkspace(null);
+        }
+      },
     });
   };
 
@@ -234,6 +254,16 @@ export default function SidebarContent({
         >
           <Settings className="h-4 w-4" />
           <span className="text-sm">Cài đặt workspace</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2 hover:bg-sidebar-accent"
+          onClick={handleOpenDeleteWorkspace}
+          disabled={!currentWorkspace}
+        >
+          <Trash className="h-4 w-4" />
+          <span className="text-sm">Xóa workspace</span>
         </Button>
 
         {/* Button redirect trash page */}
