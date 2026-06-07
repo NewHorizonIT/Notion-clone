@@ -112,10 +112,6 @@ class WorkspaceService {
     userId: string,
   ): Promise<boolean> {
     // Step 1: Check wokspace exists
-    console.log(
-      "🚀 ~ file: workspace.service.ts:143 ~ WorkspaceService ~ ensureUserHasAccessToWorkspace ~ workspaceId:",
-      workspaceId,
-    );
     const workspace = await this.workspaceRepo.getWorkspaceById(
       workspaceId,
       userId,
@@ -138,6 +134,28 @@ class WorkspaceService {
       });
     }
     return true;
+  }
+
+  // Delete soft workspace
+  public async deleteSoftWorkspace(
+    id: string,
+    userId: string,
+  ): Promise<WorkSpaceResponse> {
+    // Step 1: check if workspace exists
+    const existingWorkspace = await this.workspaceRepo.getWorkspaceById(
+      id,
+      userId,
+    );
+    if (!existingWorkspace) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace not found",
+        error: "Not Found",
+      });
+    }
+    // Step 2: delete soft workspace
+    const deletedWorkspace = await this.workspaceRepo.deleteSoftWorkspace(id);
+    return deletedWorkspace as WorkSpaceResponse;
   }
 }
 

@@ -53,6 +53,15 @@ class WorkSpaceRepo {
     return workspace;
   }
 
+  // Detele soft workspace
+  public async deleteSoftWorkspace(id: string) {
+    const workspace = await this.prisma.workSpace.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+    return workspace;
+  }
+
   // Delete workspace
   public async deleteWorkspace(id: string) {
     const workspace = await this.prisma.workSpace.delete({

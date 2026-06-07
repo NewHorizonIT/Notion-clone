@@ -3,6 +3,7 @@
 
 import { ForgetPasswordModal } from "@/features/auth/components/modals/ForgetPassword";
 import CreateWorkSpaceForm from "@/features/workspace/components/modal/CreateWorkSpaeForm";
+import ConfirmDeleteWorkspace from "@/features/workspace/components/modal/ConfirmDeleteWorkspace";
 import { useModalStore } from "@/shared/store/useModalStore";
 
 export function ModalProvider() {
@@ -18,6 +19,13 @@ export function ModalProvider() {
       )}
       {modalType === "edit-workspace" && (
         <CreateWorkSpaceForm isOpen onOpenChange={closeModal} {...modalProps} />
+      )}
+      {modalType === "delete-workspace" && (
+        <ConfirmDeleteWorkspace
+          isOpen
+          onOpenChange={closeModal}
+          {...modalProps}
+        />
       )}
     </>
   );

@@ -170,6 +170,7 @@ model WorkSpace {
   createdAt DateTime @default(now()) @map("created_at")
   ownerId   String   @map("owner_id")
   slug        String   @unique @db.VarChar(50)
+  deletedAt  DateTime?
 
   owner   User              @relation("WorkspaceOfUser", fields: [ownerId], references: [id])
   pages   Page[]            @relation("PageOfWorkspace")
