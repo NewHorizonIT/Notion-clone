@@ -1,22 +1,60 @@
 import { injectable } from "tsyringe";
-import { PrismaClient } from "../generated/prisma";
-import { WorkspaceRole } from "../generated/prisma";
+import {
+  PrismaClient,
+  WorkspaceMember,
+  WorkspaceRole,
+} from "../generated/prisma";
+
+export type WorkspaceMemberWithUser = WorkspaceMember & {
+  members: {
+    id: string;
+    username: string;
+    email: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+};
+
 @injectable()
 class WorkspaceMemberRepo {
   constructor(private readonly prisma: PrismaClient) {}
 
-  // Invite member to workspace
-  async inviteMemberToWorkspace(workspaceId: string, userId: string) {
+  // Create member in workspace
+  async createWorkspaceMember(
+    workspaceId: string,
+    userId: string,
+    role: WorkspaceRole = WorkspaceRole.MEMBER,
+  ) {
     return this.prisma.workspaceMember.create({
       data: {
         workspaceId: workspaceId,
         userId: userId,
+        roleId: role,
+      },
+    });
+  }
+
+  // Get member by workspace and user
+  async getWorkspaceMemberByWorkspaceAndUser(
+    workspaceId: string,
+    userId: string,
+  ) {
+    return this.prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId,
+          userId,
+        },
+      },
+      include: {
+        members: true,
       },
     });
   }
 
   // Get list member of workspace
-  async getListMemberOfWorkspace(workspaceId: string) {
+  async getWorkspaceMembers(workspaceId: string) {
     return this.prisma.workspaceMember.findMany({
       where: {
         workspaceId: workspaceId,
@@ -29,10 +67,12 @@ class WorkspaceMemberRepo {
 
   // Remove member from workspace
   async removeMemberFromWorkspace(workspaceId: string, userId: string) {
-    return this.prisma.workspaceMember.deleteMany({
+    return this.prisma.workspaceMember.delete({
       where: {
-        workspaceId: workspaceId,
-        userId: userId,
+        workspaceId_userId: {
+          workspaceId,
+          userId,
+        },
       },
     });
   }
@@ -43,10 +83,12 @@ class WorkspaceMemberRepo {
     userId: string,
     role: WorkspaceRole,
   ) {
-    return this.prisma.workspaceMember.updateMany({
+    return this.prisma.workspaceMember.update({
       where: {
-        workspaceId: workspaceId,
-        userId: userId,
+        workspaceId_userId: {
+          workspaceId,
+          userId,
+        },
       },
       data: {
         roleId: role,
@@ -56,12 +98,10 @@ class WorkspaceMemberRepo {
 
   // Check if user is member of workspace
   async isUserMemberOfWorkspace(workspaceId: string, userId: string) {
-    const member = await this.prisma.workspaceMember.findFirst({
-      where: {
-        workspaceId: workspaceId,
-        userId: userId,
-      },
-    });
+    const member = await this.getWorkspaceMemberByWorkspaceAndUser(
+      workspaceId,
+      userId,
+    );
     return !!member;
   }
 }

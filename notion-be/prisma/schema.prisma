@@ -181,8 +181,8 @@ model WorkSpace {
 
 enum WorkspaceRole {
   OWNER
+  ADMIN
   MEMBER
-  VIEWER
 }
 
 model WorkspaceMember {
@@ -195,5 +195,6 @@ model WorkspaceMember {
   members   User          @relation("UserMember", fields: [userId], references: [id])
   workspace WorkSpace     @relation("MemberOfWorkspace", fields: [workspaceId], references: [id])
 
+  @@unique([workspaceId, userId])
   @@map("workspace_members")
 }

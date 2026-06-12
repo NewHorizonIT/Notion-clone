@@ -149,3 +149,148 @@
  *       401:
  *         description: Unauthorized
  */
+
+/**
+ * @swagger
+ * /workspaces/{id}/members:
+ *   get:
+ *     summary: Get all members in a workspace
+ *     tags: [Workspaces]
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Workspace member list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/WorkspaceMember'
+ *       403:
+ *         description: Access denied
+ *       404:
+ *         description: Workspace not found
+ */
+
+/**
+ * @swagger
+ * /workspaces/{id}/invite:
+ *   post:
+ *     summary: Invite a user to a workspace
+ *     tags: [Workspaces]
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/InviteWorkspaceMember'
+ *     responses:
+ *       201:
+ *         description: Member invited successfully
+ *       400:
+ *         description: Invalid role assignment
+ *       403:
+ *         description: Only workspace owner can invite members
+ *       404:
+ *         description: Workspace or user not found
+ *       409:
+ *         description: User is already a member of the workspace
+ */
+
+/**
+ * @swagger
+ * /workspaces/{id}/members/{userId}:
+ *   delete:
+ *     summary: Remove a member from a workspace
+ *     tags: [Workspaces]
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Member removed successfully
+ *       400:
+ *         description: OWNER member cannot be removed
+ *       403:
+ *         description: Only workspace owner can remove members
+ *       404:
+ *         description: Workspace or member not found
+ */
+
+/**
+ * @swagger
+ * /workspaces/{id}/members/{userId}/role:
+ *   patch:
+ *     summary: Update a workspace member role
+ *     tags: [Workspaces]
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateWorkspaceMemberRole'
+ *     responses:
+ *       200:
+ *         description: Member role updated successfully
+ *       400:
+ *         description: Invalid role assignment or OWNER role modification
+ *       403:
+ *         description: Only workspace owner can change roles
+ *       404:
+ *         description: Workspace or member not found
+ */

@@ -39,7 +39,7 @@ class WorkspaceService {
 
   // Get workspace by id
   public async getWorkspaceById(id: string, userId: string): Promise<any> {
-    const workspace = await this.workspaceRepo.getWorkspaceById(id, userId);
+    const workspace = await this.workspaceRepo.findWorkspaceById(id);
     if (!workspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
@@ -47,6 +47,19 @@ class WorkspaceService {
         error: "Not Found",
       });
     }
+    return workspace;
+  }
+
+  public async findWorkspaceById(id: string): Promise<any> {
+    const workspace = await this.workspaceRepo.findWorkspaceById(id);
+    if (!workspace) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace not found",
+        error: "Not Found",
+      });
+    }
+
     return workspace;
   }
 
@@ -111,17 +124,20 @@ class WorkspaceService {
     workspaceId: string,
     userId: string,
   ): Promise<boolean> {
-    // Step 1: Check wokspace exists
-    const workspace = await this.workspaceRepo.getWorkspaceById(
-      workspaceId,
-      userId,
-    );
+    const workspace = await this.workspaceRepo.findWorkspaceById(workspaceId);
 
-    if (workspace) {
+    if (!workspace) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace not found",
+        error: "Not Found",
+      });
+    }
+
+    if (workspace.ownerId === userId) {
       return true;
     }
 
-    // Step 3: Check user is member of workspace
     const hasAccess = await this.workspaceMemberRepo.isUserMemberOfWorkspace(
       workspaceId,
       userId,
@@ -142,10 +158,7 @@ class WorkspaceService {
     userId: string,
   ): Promise<WorkSpaceResponse> {
     // Step 1: check if workspace exists
-    const existingWorkspace = await this.workspaceRepo.getWorkspaceById(
-      id,
-      userId,
-    );
+    const existingWorkspace = await this.workspaceRepo.findWorkspaceById(id);
     if (!existingWorkspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
