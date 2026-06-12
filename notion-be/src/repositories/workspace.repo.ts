@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient, WorkspaceRole } from "../generated/prisma";
 import { createSlug } from "../utils";
 
 @injectable()
@@ -8,14 +8,25 @@ class WorkSpaceRepo {
 
   // Create workspace
   public async createWorkspace(name: string, ownerId: string) {
-    const workspace = await this.prisma.workSpace.create({
-      data: {
-        name: name,
-        ownerId: ownerId,
-        slug: createSlug(name),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const workspace = await tx.workSpace.create({
+        data: {
+          name: name,
+          ownerId: ownerId,
+          slug: createSlug(name),
+        },
+      });
+
+      await tx.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId: ownerId,
+          roleId: WorkspaceRole.OWNER,
+        },
+      });
+
+      return workspace;
     });
-    return workspace;
   }
 
   // Get workspace by id
@@ -32,6 +43,21 @@ class WorkSpaceRepo {
       },
     });
     return workspace;
+  }
+
+  // Find workspace by id
+  public async findWorkspaceById(id: string) {
+    return this.prisma.workSpace.findUnique({
+      where: { id },
+      include: {
+        pages: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
   }
 
   // Get list workspace of user

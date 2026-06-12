@@ -126,10 +126,7 @@ export function handleMessage(
   }
 }
 
-export async function leaveRoom(
-  pageId: string,
-  ws: WebSocket,
-): Promise<void> {
+export async function leaveRoom(pageId: string, ws: WebSocket): Promise<void> {
   const room = rooms.get(pageId);
   if (!room) return;
 

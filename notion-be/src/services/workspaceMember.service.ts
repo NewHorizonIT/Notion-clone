@@ -1,121 +1,247 @@
 import { injectable } from "tsyringe";
-import WorkspaceMemberRepo from "../repositories/workspaceMember.repo";
+import WorkspaceMemberRepo, {
+  WorkspaceMemberWithUser,
+} from "../repositories/workspaceMember.repo";
 import { ErrorResponse } from "../response/response";
 import { StatusCodes } from "../response";
+import { WorkspaceRole } from "../generated/prisma";
+import WorkspaceRepo from "../repositories/workspace.repo";
+import UserRepo from "../repositories/userRepo";
+import {
+  InviteWorkspaceMemberData,
+  UpdateWorkspaceMemberRoleData,
+} from "../schemas/workspaceMember.schema";
 
 @injectable()
 class WorkspaceMemberService {
-  constructor(private workspaceMemberRepo: WorkspaceMemberRepo) {}
+  constructor(
+    private workspaceMemberRepo: WorkspaceMemberRepo,
+    private workspaceRepo: WorkspaceRepo,
+    private userRepo: UserRepo,
+  ) {}
 
-  // Invite member to workspace
-  public async inviteMemberToWorkspace(
-    workspaceId: string,
-    userId: string,
-  ): Promise<unknown> {
-    // Step 1: check if user is already a member of the workspace
-    const isMember = await this.workspaceMemberRepo.isUserMemberOfWorkspace(
-      workspaceId,
-      userId,
-    );
-    if (isMember) {
+  private async getWorkspaceOrThrow(workspaceId: string) {
+    const workspace = await this.workspaceRepo.findWorkspaceById(workspaceId);
+    if (!workspace) {
       throw new ErrorResponse({
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: "User is already a member of the workspace",
-        error: "Bad Request",
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace not found",
+        error: "Not Found",
       });
     }
 
-    // Step 2: invite member to workspace
-    const member = await this.workspaceMemberRepo.inviteMemberToWorkspace(
-      workspaceId,
-      userId,
-    );
+    return workspace;
+  }
+
+  private async getWorkspaceMemberOrThrow(
+    workspaceId: string,
+    userId: string,
+  ): Promise<WorkspaceMemberWithUser> {
+    const member =
+      await this.workspaceMemberRepo.getWorkspaceMemberByWorkspaceAndUser(
+        workspaceId,
+        userId,
+      );
+
     if (!member) {
       throw new ErrorResponse({
-        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "Failed to invite member to workspace",
-        error: "Internal Server Error",
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace member not found",
+        error: "Not Found",
       });
     }
 
     return member;
   }
 
-  // Remove member from workspace
-  public async removeMemberFromWorkspace(
-    workspaceId: string,
-    userId: string,
-  ): Promise<unknown> {
-    // Step 1: check if user is a member of the workspace
-    const isMember = await this.workspaceMemberRepo.isUserMemberOfWorkspace(
-      workspaceId,
-      userId,
-    );
-    if (!isMember) {
-      throw new ErrorResponse({
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: "User is not a member of the workspace",
-        error: "Bad Request",
-      });
+  private assertOwnerRole(
+    workspaceOwnerId: string,
+    requesterUserId: string,
+    currentRole?: WorkspaceRole,
+  ): void {
+    if (
+      workspaceOwnerId === requesterUserId ||
+      currentRole === WorkspaceRole.OWNER
+    ) {
+      return;
     }
 
-    // Step 2: remove member from workspace
-    const result = await this.workspaceMemberRepo.removeMemberFromWorkspace(
-      workspaceId,
-      userId,
-    );
-    if (result.count === 0) {
-      throw new ErrorResponse({
-        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "Failed to remove member from workspace",
-        error: "Internal Server Error",
-      });
-    }
-
-    return result;
+    throw new ErrorResponse({
+      statusCode: StatusCodes.FORBIDDEN,
+      message: "Only workspace owner can perform this action",
+      error: "FORBIDDEN",
+    });
   }
 
-  // update role of member in workspace
-  public async updateRoleOfMemberInWorkspace(
-    workspaceId: string,
-    userId: string,
-    role: string,
-  ): Promise<unknown> {
-    // Step 1: check if user is a member of the workspace
-    const isMember = await this.workspaceMemberRepo.isUserMemberOfWorkspace(
-      workspaceId,
-      userId,
-    );
-    if (!isMember) {
+  private ensureMutableMember(
+    workspaceOwnerId: string,
+    targetUserId: string,
+    targetRole: WorkspaceRole,
+  ): void {
+    if (
+      workspaceOwnerId === targetUserId ||
+      targetRole === WorkspaceRole.OWNER
+    ) {
       throw new ErrorResponse({
         statusCode: StatusCodes.BAD_REQUEST,
-        message: "User is not a member of the workspace",
+        message: "OWNER role cannot be modified",
         error: "Bad Request",
       });
     }
-
-    // Step 2: update role of member in workspace
-    const result = await this.workspaceMemberRepo.updateRoleOfMemberInWorkspace(
-      workspaceId,
-      userId,
-      role as any,
-    );
-    if (result.count === 0) {
-      throw new ErrorResponse({
-        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "Failed to update role of member in workspace",
-        error: "Internal Server Error",
-      });
-    }
-
-    return result;
   }
 
   // Get list member of workspace
-  public async getListMemberOfWorkspace(workspaceId: string): Promise<unknown> {
-    const members =
-      await this.workspaceMemberRepo.getListMemberOfWorkspace(workspaceId);
-    return members;
+  public async getListMemberOfWorkspace(
+    workspaceId: string,
+    requesterUserId: string,
+  ): Promise<WorkspaceMemberWithUser[]> {
+    const workspace = await this.getWorkspaceOrThrow(workspaceId);
+    const requesterMember =
+      await this.workspaceMemberRepo.getWorkspaceMemberByWorkspaceAndUser(
+        workspaceId,
+        requesterUserId,
+      );
+
+    if (!requesterMember && workspace.ownerId !== requesterUserId) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.FORBIDDEN,
+        message: "Access denied",
+        error: "FORBIDDEN",
+      });
+    }
+
+    return this.workspaceMemberRepo.getWorkspaceMembers(workspaceId);
+  }
+
+  // Invite member to workspace
+  public async inviteMemberToWorkspace(
+    workspaceId: string,
+    requesterUserId: string,
+    payload: InviteWorkspaceMemberData,
+  ): Promise<WorkspaceMemberWithUser> {
+    const workspace = await this.getWorkspaceOrThrow(workspaceId);
+    this.assertOwnerRole(workspace.ownerId, requesterUserId);
+
+    if (payload.role === WorkspaceRole.OWNER) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "OWNER role cannot be assigned through invite API",
+        error: "Bad Request",
+      });
+    }
+
+    const targetUser = await this.userRepo.getUserById(payload.userId);
+    if (!targetUser) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "User not found",
+        error: "Not Found",
+      });
+    }
+
+    const existingMember =
+      await this.workspaceMemberRepo.getWorkspaceMemberByWorkspaceAndUser(
+        workspaceId,
+        payload.userId,
+      );
+
+    if (existingMember) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.CONFLICT,
+        message: "User is already a member of the workspace",
+        error: "Conflict",
+      });
+    }
+
+    const member = await this.workspaceMemberRepo.createWorkspaceMember(
+      workspaceId,
+      payload.userId,
+      payload.role,
+    );
+
+    return this.getWorkspaceMemberOrThrow(workspaceId, member.userId);
+  }
+
+  // Remove member from workspace
+  public async removeMemberFromWorkspace(
+    workspaceId: string,
+    requesterUserId: string,
+    targetUserId: string,
+  ): Promise<void> {
+    const workspace = await this.getWorkspaceOrThrow(workspaceId);
+    this.assertOwnerRole(workspace.ownerId, requesterUserId);
+
+    const targetMember =
+      await this.workspaceMemberRepo.getWorkspaceMemberByWorkspaceAndUser(
+        workspaceId,
+        targetUserId,
+      );
+
+    if (!targetMember) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace member not found",
+        error: "Not Found",
+      });
+    }
+
+    this.ensureMutableMember(
+      workspace.ownerId,
+      targetUserId,
+      targetMember.roleId,
+    );
+
+    await this.workspaceMemberRepo.removeMemberFromWorkspace(
+      workspaceId,
+      targetUserId,
+    );
+  }
+
+  // Update role of member in workspace
+  public async updateRoleOfMemberInWorkspace(
+    workspaceId: string,
+    requesterUserId: string,
+    targetUserId: string,
+    payload: UpdateWorkspaceMemberRoleData,
+  ): Promise<WorkspaceMemberWithUser> {
+    const workspace = await this.getWorkspaceOrThrow(workspaceId);
+    this.assertOwnerRole(workspace.ownerId, requesterUserId);
+
+    if (payload.role === WorkspaceRole.OWNER) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "OWNER role cannot be assigned through change-role API",
+        error: "Bad Request",
+      });
+    }
+
+    const targetMember =
+      await this.workspaceMemberRepo.getWorkspaceMemberByWorkspaceAndUser(
+        workspaceId,
+        targetUserId,
+      );
+
+    if (!targetMember) {
+      throw new ErrorResponse({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Workspace member not found",
+        error: "Not Found",
+      });
+    }
+
+    this.ensureMutableMember(
+      workspace.ownerId,
+      targetUserId,
+      targetMember.roleId,
+    );
+
+    await this.workspaceMemberRepo.updateRoleOfMemberInWorkspace(
+      workspaceId,
+      targetUserId,
+      payload.role,
+    );
+
+    return this.getWorkspaceMemberOrThrow(workspaceId, targetUserId);
   }
 
   // Check if user is member of workspace

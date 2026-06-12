@@ -85,6 +85,53 @@ const options: swaggerJsdoc.Options = {
             createdAt: { type: "string", format: "date-time" },
           },
         },
+        WorkspaceMemberUser: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            username: { type: "string" },
+            email: { type: "string", format: "email" },
+            isActive: { type: "boolean" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        WorkspaceMember: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            workspaceId: { type: "string", format: "uuid" },
+            userId: { type: "string", format: "uuid" },
+            roleId: {
+              type: "string",
+              enum: ["OWNER", "ADMIN", "MEMBER"],
+            },
+            createdAt: { type: "string", format: "date-time" },
+            members: { $ref: "#/components/schemas/WorkspaceMemberUser" },
+          },
+        },
+        InviteWorkspaceMember: {
+          type: "object",
+          required: ["userId"],
+          properties: {
+            userId: { type: "string", format: "uuid" },
+            role: {
+              type: "string",
+              enum: ["OWNER", "ADMIN", "MEMBER"],
+              default: "MEMBER",
+            },
+          },
+        },
+        UpdateWorkspaceMemberRole: {
+          type: "object",
+          required: ["role"],
+          properties: {
+            role: {
+              type: "string",
+              enum: ["OWNER", "ADMIN", "MEMBER"],
+            },
+          },
+        },
         CreateWorkspace: {
           type: "object",
           required: ["name"],

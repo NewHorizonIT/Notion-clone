@@ -70,7 +70,7 @@ class WorkSpaceController {
     }
 
     // Step 2: get workspace by id
-    const workspace = await this.workSpaceRepo.getWorkspaceById(id, userId);
+    const workspace = await this.workSpaceRepo.findWorkspaceById(id);
     if (!workspace) {
       throw new ErrorResponse({
         statusCode: StatusCodes.NOT_FOUND,
