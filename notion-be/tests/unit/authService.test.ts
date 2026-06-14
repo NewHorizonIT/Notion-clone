@@ -10,6 +10,7 @@ const mockUserRepo = () => ({
   createUser: vi.fn(),
   getUserByEmail: vi.fn(),
   updateUserById: vi.fn(),
+  getUserById: vi.fn(),
 });
 
 const userData = {
@@ -17,6 +18,18 @@ const userData = {
   username: "Test User",
   email: "test@example.com",
   passwordHash: "hashed-password",
+  isActive: true,
+  createdAt: new Date("2026-06-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+};
+
+const publicUserData = {
+  id: userData.id,
+  username: userData.username,
+  email: userData.email,
+  isActive: userData.isActive,
+  createdAt: userData.createdAt,
+  updatedAt: userData.updatedAt,
 };
 
 vi.mock("../../src/utils/index", () => {
@@ -62,7 +75,8 @@ describe("AuthService", () => {
 
       expect(result.token.accessToken).toBe("access-token");
       expect(result.token.refreshToken).toBe("refresh-token");
-      expect(result.user).toEqual(userData);
+      expect(result.user).toEqual(publicUserData);
+      expect(result.user).not.toHaveProperty("passwordHash");
     });
   });
 
@@ -91,7 +105,8 @@ describe("AuthService", () => {
       });
       expect(result.token.accessToken).toBe("access-token");
       expect(result.token.refreshToken).toBe("refresh-token");
-      expect(result.user).toEqual(userData);
+      expect(result.user).toEqual(publicUserData);
+      expect(result.user).not.toHaveProperty("passwordHash");
     });
   });
 
@@ -121,7 +136,22 @@ describe("AuthService", () => {
     it("should return newUser if updateUserById success", async () => {
       repo.updateUserById.mockResolvedValue(userData);
       const result = await service.resetPassword("id", "pw");
-      expect(result.user).toEqual(userData);
+      expect(result.user).toEqual(publicUserData);
+      expect(result.user).not.toHaveProperty("passwordHash");
+    });
+  });
+
+  describe("getMe", () => {
+    it("should throw if user not found", async () => {
+      repo.getUserById.mockResolvedValue(null);
+      await expect(service.getMe("id")).rejects.toThrowError(ErrorResponse);
+    });
+
+    it("should return a public user if found", async () => {
+      repo.getUserById.mockResolvedValue(userData);
+      const result = await service.getMe("id");
+      expect(result.user).toEqual(publicUserData);
+      expect(result.user).not.toHaveProperty("passwordHash");
     });
   });
 });

@@ -1,4 +1,5 @@
 import z from "zod";
+import type { User } from "../generated/prisma";
 
 export const UserLoginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -13,8 +14,10 @@ export const userResetPassword = z.object({
   password: z.string().min(5, "Length password more than 5"),
 });
 
+export type PublicUser = Omit<User, "passwordHash">;
+
 export interface UserResponseDTO {
-  user: Record<string, unknown>;
+  user: PublicUser;
 }
 
 export interface UserResponseAuthDTO extends UserResponseDTO {
