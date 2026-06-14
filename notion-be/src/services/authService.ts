@@ -6,8 +6,10 @@ import {
   UserResponseToken,
   UserResponseDTO,
   UserEmailDTO,
+  PublicUser,
 } from "../schemas/userSchema";
 import UserRepo from "../repositories/userRepo";
+import { User } from "../generated/prisma";
 import {
   comparePassword,
   generateAccessToken,
@@ -23,6 +25,12 @@ import sendResetEmail from "../utils/email";
 @injectable()
 export default class AuthService {
   constructor(private userRepo: UserRepo) {}
+
+  private toPublicUser(user: User): PublicUser {
+    const { passwordHash, ...publicUser } = user;
+    return publicUser;
+  }
+
   async registerAccount(data: UserRegisterData): Promise<UserResponseAuthDTO> {
     // Step 1: Get data of new User
     const { name, email, password } = data;
@@ -77,7 +85,7 @@ export default class AuthService {
         accessToken,
         refreshToken,
       },
-      user: newUser,
+      user: this.toPublicUser(newUser),
     };
   }
 
@@ -125,7 +133,7 @@ export default class AuthService {
         accessToken,
         refreshToken,
       },
-      user,
+      user: this.toPublicUser(user),
     };
   }
 
@@ -178,7 +186,7 @@ export default class AuthService {
     }
 
     return {
-      user: newUser,
+      user: this.toPublicUser(newUser),
     };
   }
 
@@ -205,7 +213,7 @@ export default class AuthService {
     }
 
     return {
-      user,
+      user: this.toPublicUser(user),
     };
   }
 }
