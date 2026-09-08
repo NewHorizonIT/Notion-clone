@@ -2,8 +2,8 @@ import { create } from "zustand";
 
 interface ModalState {
   modalType: string | null;
-  modalProps?: unknown;
-  openModal: (type: string, props?: unknown) => void;
+  modalProps?: Record<string, unknown>;
+  openModal: (type: string, props?: Record<string, unknown>) => void;
   closeModal: () => void;
 }
 
