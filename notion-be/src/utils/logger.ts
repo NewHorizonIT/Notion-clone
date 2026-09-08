@@ -1,12 +1,12 @@
 import winston from "winston";
 import fs from "fs";
 import path from "path";
+import config from "../config";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 // Tạo thư mục logs nếu chưa tồn tại
-const logDir = "logs";
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
-}
+const logDir = path.join(__dirname, "../../logs");
+fs.mkdirSync(logDir, { recursive: true });
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
@@ -24,26 +24,38 @@ const consoleFormat = winston.format.combine(
   }),
 );
 
+const rotateOptions = {
+  zippedArchive: true,
+  datePattern: "YYYY-MM-DD",
+  maxSize: config.logger.maxSize || "10m",
+  maxFiles: config.logger.maxFiles || "14d",
+};
+
 const logger = winston.createLogger({
-  level: "info",
-  format: logFormat, // 👈 Áp dụng format chung cho tất cả transport
-  transports: [
-    // 👇 Log ra file toàn bộ
-    new winston.transports.File({
-      filename: path.join(logDir, "combined.log"),
-    }),
-
-    // 👇 Log ra file chỉ lỗi
-    new winston.transports.File({
-      filename: path.join(logDir, "error.log"),
-      level: "error",
-    }),
-
-    // 👇 Log ra console
-    new winston.transports.Console({
-      format: consoleFormat,
-    }),
-  ],
+  format: logFormat,
+  level: config.logger.level || "warn",
+  transports:
+    process.env.NODE_ENV === "production"
+      ? [
+          new DailyRotateFile({
+            filename:
+              config.logger.file || path.join(logDir, "application-%DATE%.log"),
+            level: config.logger.level || "info",
+            ...rotateOptions,
+          }),
+          new DailyRotateFile({
+            filename:
+              config.logger.errorFile || path.join(logDir, "error-%DATE%.log"),
+            level: "error",
+            ...rotateOptions,
+          }),
+        ]
+      : [
+          new winston.transports.Console({
+            format: consoleFormat,
+            level: config.logger.level || "debug",
+          }),
+        ],
 });
 
 export default logger;
