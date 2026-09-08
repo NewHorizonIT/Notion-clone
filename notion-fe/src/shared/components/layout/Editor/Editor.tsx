@@ -33,7 +33,7 @@ function apiBlockToEditorBlock(apiBlock: ApiBlock): PartialBlock {
     props: content?.props as Record<string, unknown> | undefined,
     content: content?.content as Block["content"] | undefined,
     children: content?.children as PartialBlock[] | undefined,
-  };
+  } as unknown as PartialBlock;
 }
 
 // Convert BlockNote block to API format
